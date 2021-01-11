@@ -31,8 +31,8 @@ If you want to set up a Virtual Schema for a different database system, please h
 
 ### Information for Users
 
-* [Virtual Schemas User Guide][user-guide]
-* [MySQL Dialect User Guide](doc/dialects/mysql_user_guide.md)
+* [Virtual Schemas User Guide][virtual-schemas-user-guide]
+* [MySQL Dialect User Guide](doc/user_guide/mysql_user_guide.md)
 * [Changelog](doc/changes/changelog.md)
 
 Find all the documentation in the [Virtual Schemas project][vs-doc].
@@ -102,7 +102,7 @@ Running the Virtual Schema requires a Java Runtime version 11 or later.
 [project-keeper-maven-plugin]: https://github.com/exasol/project-keeper-maven-plugin
 [sonatype-oss-index-maven-plugin]: https://sonatype.github.io/ossindex-maven/maven-plugin/
 
-[user-guide]: https://docs.exasol.com/database_concepts/virtual_schemas.htm
+[virtual-schemas-user-guide]: https://docs.exasol.com/database_concepts/virtual_schemas.htm
 [virtual-schemas]: https://github.com/exasol/virtual-schemas
 [vs-api]: https://github.com/exasol/virtual-schema-common-java/blob/master/doc/development/api/virtual_schema_api.md
 [vs-doc]: https://github.com/exasol/virtual-schemas/tree/master/doc
