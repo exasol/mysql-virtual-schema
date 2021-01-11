@@ -1,4 +1,4 @@
-#Virtual Schema for MySQL 1.0.0, released 2021-??-??
+# Virtual Schema for MySQL 1.0.0, released 2021-??-??
 
 Code name: 
 
