@@ -1,7 +1,6 @@
 # MySQL Virtual Schema
 
 [![Build Status](https://api.travis-ci.com/exasol/mysql-virtual-schema.svg?branch=main)](https://travis-ci.com/exasol/mysql-virtual-schema)
-[![Maven Central](https://img.shields.io/maven-central/v/com.exasol/mysql-virtual-schema)](https://search.maven.org/artifact/com.exasol/mysql-virtual-schema)
 
 SonarCloud results:
 
@@ -45,11 +44,11 @@ Find all the documentation in the [Virtual Schemas project][vs-doc].
 
 Running the Virtual Schema requires a Java Runtime version 11 or later.
 
-| Dependency                                                         | Purpose                                                | License                       |
-|--------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
-| [Exasol Virtual Schema JDBC][virtual-schema-common-jdbc]           | Common JDBC functions for Virtual Schemas adapters     | MIT License                   |
-| [MySQL JDBC Driver][mysql-jdbc-driver]                             | JDBC driver for MySQL database                         | Elastic License               |
-| [Exasol Error Reporting][exasol-error-reporting]                   | Creating unified error messages                        | MIT License                   |
+| Dependency                                                         | Purpose                                                | License                                   |
+|--------------------------------------------------------------------|--------------------------------------------------------|-------------------------------------------|
+| [Exasol Virtual Schema JDBC][virtual-schema-common-jdbc]           | Common JDBC functions for Virtual Schemas adapters     | MIT License                               |
+| [MySQL JDBC Driver][mysql-jdbc-driver]                             | JDBC driver for MySQL database                         | Specified in the MySQL Dialect User Guide |
+| [Exasol Error Reporting][exasol-error-reporting]                   | Creating unified error messages                        | MIT License                               |
 
 ### Test Dependencies
 

@@ -21,10 +21,10 @@ You need to specify the following settings when adding the JDBC driver via EXAOp
 
 | Parameter | Value                                               |
 |-----------|-----------------------------------------------------|
-| Name      | `MYSQL`                                             |
-| Main      | `com.mysql.jdbc.Driver`                             |
-| Prefix    | `jdbc:mysql:`                                       |
-| Files     | `mysql-connector-java-<version>.jar`                |
+| Name      | `MYSQL`                                            |
+| Main      | `com.mysql.jdbc.Driver`                          |
+| Prefix    | `jdbc:mysql:`                                     |
+| Files     | `mysql-connector-java-<version>.jar`           |
 
 IMPORTANT: Currently you have to **Disable Security Manager** for the driver if you want to connect to MySQL using Virtual Schemas.
 It is necessary because JDBC driver requires a JAVA permission which we do not grant by default.  
@@ -51,7 +51,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-8.0.0-bundle-4.0.5.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-8.0.0-mysql-1.0.0.jar;
     %jar /buckets/<BFS service>/<bucket>/mysql-connector-java-<version>.jar;
 /
 ;
