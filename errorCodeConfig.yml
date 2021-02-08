@@ -1,0 +1,5 @@
+error-tags:
+  VS-MYSQL:
+    packages:
+      - com.exasol.adapter.dialects.mysql
+    highest-index: 1
