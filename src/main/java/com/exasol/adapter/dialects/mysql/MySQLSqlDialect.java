@@ -123,8 +123,8 @@ public class MySQLSqlDialect extends AbstractSqlDialect {
             return new MySQLMetadataReader(this.connectionFactory.getConnection(), this.properties);
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException(ExaError.messageBuilder("E-VS-MYSQL-1")
-                    .message("Unable to create MySQL remote metadata reader. Caused by: " + exception.getMessage())
-                    .toString(), exception);
+                    .message("Unable to create MySQL remote metadata reader. Caused by: {{cause}}")
+                    .unquotedParameter("cause", exception.getMessage()).toString(), exception);
         }
     }
 
