@@ -4,7 +4,7 @@ Code name:
 
 ## Features / Enhancements
 
-* 4: Unify error messages with `error-reporting-java` 
+* 4: Unified error messages with `error-reporting-java` 
 
 ## Plugin Dependencies
 
