@@ -17,6 +17,7 @@ import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.*;
 import com.exasol.adapter.sql.SqlNodeVisitor;
+import com.exasol.errorreporting.ExaError;
 
 /**
  * This class implements the SQL dialect of MySQL.
@@ -121,8 +122,9 @@ public class MySQLSqlDialect extends AbstractSqlDialect {
         try {
             return new MySQLMetadataReader(this.connectionFactory.getConnection(), this.properties);
         } catch (final SQLException exception) {
-            throw new RemoteMetadataReaderException(
-                    "Unable to create MySQL remote metadata reader. Caused by: " + exception.getMessage(), exception);
+            throw new RemoteMetadataReaderException(ExaError.messageBuilder("E-VS-MYSQL-1")
+                    .message("Unable to create MySQL remote metadata reader. Caused by: {{cause}}")
+                    .unquotedParameter("cause", exception.getMessage()).toString(), exception);
         }
     }
 

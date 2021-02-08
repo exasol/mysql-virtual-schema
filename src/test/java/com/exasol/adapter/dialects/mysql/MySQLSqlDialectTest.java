@@ -12,6 +12,11 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+
+import java.sql.SQLException;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.jdbc.ConnectionFactory;
+import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
 
 @ExtendWith(MockitoExtension.class)
 class MySQLSqlDialectTest {
@@ -136,8 +142,15 @@ class MySQLSqlDialectTest {
 
     @Test
     void testMetadataReaderClass() {
-        assertThat(this.dialect.createRemoteMetadataReader(),
-                instanceOf(MySQLMetadataReader.class));
+        assertThat(this.dialect.createRemoteMetadataReader(), instanceOf(MySQLMetadataReader.class));
+    }
+
+    @Test
+    void testCreateRemoteMetadataReaderConnectionFails() throws SQLException {
+        when(this.connectionFactoryMock.getConnection()).thenThrow(new SQLException());
+        final RemoteMetadataReaderException exception = assertThrows(RemoteMetadataReaderException.class,
+                this.dialect::createRemoteMetadataReader);
+        assertThat(exception.getMessage(), containsString("E-VS-MYSQL-1"));
     }
 
     @Test
