@@ -3,17 +3,19 @@ package com.exasol.adapter.dialects.mysql;
 import static com.exasol.adapter.dialects.mysql.IntegrationTestConstants.*;
 import static com.exasol.dbbuilder.dialects.exasol.AdapterScript.Language.JAVA;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
+import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.*;
 import java.nio.file.Path;
 import java.sql.*;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.*;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -22,11 +24,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
-import com.exasol.dbbuilder.dialects.Schema;
-import com.exasol.dbbuilder.dialects.Table;
+import com.exasol.dbbuilder.dialects.*;
 import com.exasol.dbbuilder.dialects.exasol.*;
 import com.exasol.dbbuilder.dialects.mysql.MySqlObjectFactory;
 import com.exasol.dbbuilder.dialects.mysql.MySqlSchema;
+import com.exasol.matcher.TypeMatchMode;
 
 /**
  * How to run `MySqlSqlDialectIT`: See the documentation <a
@@ -35,7 +37,6 @@ import com.exasol.dbbuilder.dialects.mysql.MySqlSchema;
 @Tag("integration")
 @Testcontainers
 class MySQLSqlDialectIT {
-    private static final String RESOURCES_FOLDER_DIALECT_NAME = "mysql";
     private static final int MYSQL_PORT = 3306;
     private static final String JDBC_CONNECTION_NAME = "JDBC";
     private static final String MYSQL_SCHEMA = "MYSQL_SCHEMA";
@@ -43,67 +44,77 @@ class MySQLSqlDialectIT {
     private static final String MYSQL_NUMERIC_DATE_DATATYPES_TABLE = "MYSQL_NUMERIC_DATE_TABLE";
     private static final String MYSQL_STRING_DATATYPES_TABLE = "MYSQL_STRING_TABLE";
     private static final String VIRTUAL_SCHEMA_JDBC = "VIRTUAL_SCHEMA_JDBC";
+    private static final String MYSQL_SOURCE_SCHEMA = "SOURCE_SCHEMA";
+    private static final String MYSQL_SOURCE_TABLE = "SOURCE_TABLE";
+    private static final String JDBC_DRIVER_NAME = "mysql-connector-java.jar";
+    private static final Path JDBC_DRIVER_PATH = Path.of("target", "mysql-driver", JDBC_DRIVER_NAME);
     @Container
     private static final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(
-            EXASOL_DOCKER_IMAGE_REFERENCE);
+            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
     @Container
     private static final MySQLContainer<?> mySQLContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE_REFERENCE)
             .withUsername("root").withPassword("");
+    private static Connection exasolConnection;
+    private static ExasolObjectFactory exasolFactory;
+    private static AdapterScript adapterScript;
+    private static ConnectionDefinition connectionDefinition;
+    private VirtualSchema virtualSchema;
+    private static MySqlObjectFactory mySqlFactory;
+    private static MySqlSchema sourceSchema;
 
     @BeforeAll
     static void beforeAll() throws InterruptedException, BucketAccessException, TimeoutException, SQLException {
-        final String driverName = getPropertyFromFile(RESOURCES_FOLDER_DIALECT_NAME, "driver.name");
-        uploadDriverToBucket(driverName, RESOURCES_FOLDER_DIALECT_NAME, exasolContainer.getDefaultBucket());
-        uploadVsJarToBucket(exasolContainer.getDefaultBucket());
-        final MySqlObjectFactory mySqlFactory = new MySqlObjectFactory(mySQLContainer.createConnection(""));
+        uploadDriverToBucket();
+        uploadVsJarToBucket();
+        mySqlFactory = new MySqlObjectFactory(mySQLContainer.createConnection(""));
         final MySqlSchema mySqlSchema = mySqlFactory.createSchema(MYSQL_SCHEMA);
         createMySqlSimpleTable(mySqlSchema);
         createMySqlNumericDateTable(mySqlSchema);
         createMySqlStringTable(mySqlSchema);
         createTestTablesForJoinTests(mySQLContainer.createConnection(""), mySqlSchema.getName());
-        final ExasolObjectFactory exasolFactory = new ExasolObjectFactory(exasolContainer.createConnection(""));
+        // Exasol setup
+        exasolConnection = exasolContainer.createConnection("");
+        exasolFactory = new ExasolObjectFactory(exasolConnection);
         final ExasolSchema exasolSchema = exasolFactory.createSchema(SCHEMA_EXASOL);
-        final AdapterScript adapterScript = createAdapterScript(driverName, exasolSchema);
+        adapterScript = createAdapterScript(JDBC_DRIVER_NAME, exasolSchema);
         final String connectionString = "jdbc:mysql://" + DOCKER_IP_ADDRESS + ":"
                 + mySQLContainer.getMappedPort(MYSQL_PORT) + "/";
-        final ConnectionDefinition connectionDefinition = exasolFactory.createConnectionDefinition(JDBC_CONNECTION_NAME,
-                connectionString, mySQLContainer.getUsername(), mySQLContainer.getPassword());
+        connectionDefinition = exasolFactory.createConnectionDefinition(JDBC_CONNECTION_NAME, connectionString,
+                mySQLContainer.getUsername(), mySQLContainer.getPassword());
         exasolFactory.createVirtualSchemaBuilder(VIRTUAL_SCHEMA_JDBC).adapterScript(adapterScript)
-                .connectionDefinition(connectionDefinition).dialectName("MYSQL")
-                .properties(Map.of("CATALOG_NAME", MYSQL_SCHEMA)).build();
+                .connectionDefinition(connectionDefinition).properties(Map.of("CATALOG_NAME", MYSQL_SCHEMA)).build();
     }
 
-    private static void uploadDriverToBucket(final String driverName, final String resourcesDialectName,
-            final Bucket bucket) throws InterruptedException, BucketAccessException, TimeoutException {
-        final Path pathToSettingsFile = Path.of("src", "test", "resources", "integration", "driver",
-                resourcesDialectName, JDBC_DRIVER_CONFIGURATION_FILE_NAME);
-        bucket.uploadFile(PATH_TO_VIRTUAL_SCHEMAS_JAR, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
-        bucket.uploadFile(pathToSettingsFile, "drivers/jdbc/" + JDBC_DRIVER_CONFIGURATION_FILE_NAME);
-        final String driverPath = getPropertyFromFile(resourcesDialectName, "driver.path");
-        bucket.uploadFile(Path.of(driverPath, driverName), "drivers/jdbc/" + driverName);
+    @AfterAll
+    static void afterAll() throws SQLException {
+        exasolConnection.close();
     }
 
-    private static String getPathToPropertyFile(final String resourcesDialectName) {
-        return "src/test/resources/integration/driver/" + resourcesDialectName + "/" + resourcesDialectName
-                + ".properties";
+    @AfterEach
+    void afterEach() {
+        dropAll(this.virtualSchema, sourceSchema);
+        this.virtualSchema = null;
+        sourceSchema = null;
     }
 
-    private static void uploadVsJarToBucket(final Bucket bucket)
-            throws InterruptedException, BucketAccessException, TimeoutException {
-        bucket.uploadFile(PATH_TO_VIRTUAL_SCHEMAS_JAR, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
-    }
-
-    private static String getPropertyFromFile(final String resourcesDialectName, final String propertyName) {
-        final String pathToPropertyFile = getPathToPropertyFile(resourcesDialectName);
-        try (final InputStream inputStream = new FileInputStream(pathToPropertyFile)) {
-            final Properties properties = new Properties();
-            properties.load(inputStream);
-            return properties.getProperty(propertyName);
-        } catch (final IOException e) {
-            throw new IllegalArgumentException(
-                    "Cannot access the properties file or read from it. Check if the path spelling is correct"
-                            + " and if the file exists.");
+    private static void dropAll(final DatabaseObject... databaseObjects) {
+        for (final DatabaseObject databaseObject : databaseObjects) {
+            if (databaseObject != null) {
+                databaseObject.drop();
+            }
         }
+    }
+
+    private static void uploadDriverToBucket() throws InterruptedException, BucketAccessException, TimeoutException {
+        final Bucket bucket = exasolContainer.getDefaultBucket();
+        final Path pathToSettingsFile = Path.of("src", "test", "resources", JDBC_DRIVER_CONFIGURATION_FILE_NAME);
+        bucket.uploadFile(pathToSettingsFile, "drivers/jdbc/" + JDBC_DRIVER_CONFIGURATION_FILE_NAME);
+        bucket.uploadFile(JDBC_DRIVER_PATH, "drivers/jdbc/" + JDBC_DRIVER_NAME);
+    }
+
+    private static void uploadVsJarToBucket() throws InterruptedException, BucketAccessException, TimeoutException {
+        final Bucket bucket = exasolContainer.getDefaultBucket();
+        bucket.uploadFile(PATH_TO_VIRTUAL_SCHEMAS_JAR, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
     }
 
     private static void createTestTablesForJoinTests(final Connection connection, final String schemaName)
@@ -317,7 +328,7 @@ class MySQLSqlDialectIT {
             final String query = "SELECT \"datetime_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
                     + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
             final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
-                    List.of("'1000-01-01 01:00:00'", "'9999-12-31 23:59:59'", "null", "null"));
+                    List.of("'1000-01-01 00:00:00'", "'9999-12-31 22:59:59'", "null", "null"));
             assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
@@ -326,7 +337,7 @@ class MySQLSqlDialectIT {
             final String query = "SELECT \"timestamp_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
                     + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
             final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
-                    List.of("'1970-01-01 01:00:01.000000'", "'2037-01-19 04:14:08.0'", "null", "null"));
+                    List.of("'1970-01-01 00:00:01.000000'", "'2037-01-19 03:14:08.0'", "null", "null"));
             assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
@@ -335,7 +346,7 @@ class MySQLSqlDialectIT {
             final String query = "SELECT \"time_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
                     + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
             final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
-                    List.of("'1970-01-01 17:59:59.000000'", "'1970-01-01 06:34:13.000000'", "null", "null"));
+                    List.of("'1970-01-01 16:59:59.000000'", "'1970-01-01 05:34:13.000000'", "null", "null"));
             assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
@@ -349,12 +360,9 @@ class MySQLSqlDialectIT {
         }
 
         @Test
-        // Unsupported data types: BINARY, BLOB, LONGBLOB, MEDIUMBLOB, TINYBLOB, VARBINARY.
-        void testUnsupported() throws SQLException, InterruptedException {
+        void testUnsupported() {
             final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_STRING_DATATYPES_TABLE;
-            final SQLException exception = assertThrows(SQLException.class, () -> getActualResultSet(query));
-            assertThat(exception.getMessage(),
-                    containsString(" Unsupported data type(s) in column(s) 1, 2, 3, 5, 7, 9 in query."));
+            assertDoesNotThrow(() -> getActualResultSet(query));
         }
 
         @Test
@@ -663,5 +671,60 @@ class MySQLSqlDialectIT {
                 List.of("false, -1", //
                         "true, 0"));
         assertThat(getActualResultSet(query), matchesResultSet(expected));
+    }
+
+    @Test
+    void testLeftShiftScalarFunction() {
+        createSourceTable(List.of("INT_COL_1", "INT_COL_2"), List.of("INT", "INT"), new Object[][] { { 10, 3 } });
+        this.virtualSchema = createVirtualSchema();
+        final String query = "SELECT BIT_LSHIFT(INT_COL_1, INT_COL_2) FROM " + this.virtualSchema.getName() + "."
+                + MYSQL_SOURCE_TABLE;
+        assertVsQuery(query, table().row(80).matches(TypeMatchMode.NO_JAVA_TYPE_CHECK));
+    }
+
+    private void createSourceTable(final List<String> columnNames, final List<String> types, final Object[][] values) {
+        sourceSchema = mySqlFactory.createSchema(MYSQL_SOURCE_SCHEMA);
+        final Table table = sourceSchema.createTable(MYSQL_SOURCE_TABLE, columnNames, types);
+        for (final Object[] value : values) {
+            table.insert(value);
+        }
+    }
+
+    private VirtualSchema createVirtualSchema() {
+        return exasolFactory.createVirtualSchemaBuilder("THE_VS") //
+                .adapterScript(adapterScript) //
+                .connectionDefinition(connectionDefinition) //
+                .properties(Map.of("CATALOG_NAME", MYSQL_SOURCE_SCHEMA)) //
+                .build();
+    }
+
+    private void assertVsQuery(final String sql, final Matcher<ResultSet> expected) {
+        try {
+            assertThat(query(sql), expected);
+        } catch (final SQLException exception) {
+            fail("Unable to run assertion query: " + sql + "\nCaused by: " + exception.getMessage());
+        }
+    }
+
+    private ResultSet query(final String sql) throws SQLException {
+        return exasolConnection.createStatement().executeQuery(sql);
+    }
+
+    @Test
+    void testRightShiftScalarFunction() {
+        createSourceTable(List.of("INT_COL_1", "INT_COL_2"), List.of("INT", "INT"), new Object[][] { { 10, 3 } });
+        this.virtualSchema = createVirtualSchema();
+        final String query = "SELECT BIT_RSHIFT(INT_COL_1, INT_COL_2) FROM " + this.virtualSchema.getName() + "."
+                + MYSQL_SOURCE_TABLE;
+        assertVsQuery(query, table().row(1).matches(TypeMatchMode.NO_JAVA_TYPE_CHECK));
+    }
+
+    @Test
+    void testHourScalarFunction() {
+        createSourceTable(List.of("TIMESTAMP_COL"), List.of("TIMESTAMP"), new Object[][] { { "2021-02-16 11:48:01" } });
+        this.virtualSchema = createVirtualSchema();
+        final String query = "SELECT HOUR(timestamp_col) FROM " + this.virtualSchema.getName() + "."
+                + MYSQL_SOURCE_TABLE;
+        assertVsQuery(query, table().row(11).matches(TypeMatchMode.NO_JAVA_TYPE_CHECK));
     }
 }

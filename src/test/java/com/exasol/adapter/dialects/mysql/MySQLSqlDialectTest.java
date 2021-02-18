@@ -73,24 +73,27 @@ class MySQLSqlDialectTest {
 
     @Test
     void testGetScalarFunctionCapabilities() {
-        assertThat(this.dialect.getCapabilities().getScalarFunctionCapabilities(), containsInAnyOrder(ABS, ACOS, ASIN,
-                ATAN, ATAN2, CEIL, COS, COT, DEGREES, DIV, EXP, FLOOR, GREATEST, LEAST, LN, LOG, MOD, POWER, RADIANS,
-                RAND, ROUND, SIGN, SIN, SQRT, TAN, ASCII, BIT_LENGTH, CONCAT, INSERT, INSTR, LENGTH, LOCATE, LOWER,
-                LPAD, LTRIM, OCTET_LENGTH, REGEXP_INSTR, REGEXP_REPLACE, REGEXP_SUBSTR, REPEAT, REPLACE, REVERSE, RIGHT,
-                RPAD, RTRIM, SOUNDEX, SPACE, SUBSTR, TRIM, UPPER, ADD_DAYS, ADD_HOURS, ADD_MINUTES, ADD_MONTHS,
-                ADD_SECONDS, ADD_WEEKS, ADD_YEARS, CONVERT_TZ, CURRENT_DATE, CURRENT_TIMESTAMP, EXTRACT, LOCALTIMESTAMP,
-                MINUTE, MONTH, SECOND, SYSDATE, SYSTIMESTAMP, WEEK, YEAR, ST_X, ST_Y, ST_ENDPOINT, ST_ISCLOSED,
-                ST_LENGTH, ST_NUMPOINTS, ST_POINTN, ST_STARTPOINT, ST_AREA, ST_EXTERIORRING, ST_INTERIORRINGN,
-                ST_NUMINTERIORRINGS, ST_GEOMETRYN, ST_NUMGEOMETRIES, ST_BUFFER, ST_CENTROID, ST_CONTAINS, ST_CONVEXHULL,
-                ST_CROSSES, ST_DIFFERENCE, ST_DIMENSION, ST_DISJOINT, ST_DISTANCE, ST_ENVELOPE, ST_EQUALS,
-                ST_GEOMETRYTYPE, ST_INTERSECTION, ST_INTERSECTS, ST_ISEMPTY, ST_ISSIMPLE, ST_OVERLAPS, ST_SYMDIFFERENCE,
-                ST_TOUCHES, ST_TRANSFORM, ST_UNION, ST_WITHIN, CAST, BIT_AND, BIT_OR, BIT_XOR, CASE, CURRENT_USER));
+        assertThat(this.dialect.getCapabilities().getScalarFunctionCapabilities(),
+                containsInAnyOrder(ABS, ACOS, ASIN, ATAN, ATAN2, CEIL, COS, COT, DEGREES, DIV, EXP, FLOOR, GREATEST,
+                        LEAST, LN, LOG, MOD, POWER, RADIANS, RAND, ROUND, SIGN, SIN, SQRT, TAN, ASCII, BIT_LENGTH,
+                        CONCAT, INSERT, INSTR, LENGTH, LOCATE, LOWER, LPAD, LTRIM, OCTET_LENGTH, REGEXP_INSTR,
+                        REGEXP_REPLACE, REGEXP_SUBSTR, REPEAT, REPLACE, REVERSE, RIGHT, RPAD, RTRIM, SOUNDEX, SPACE,
+                        SUBSTR, TRIM, UPPER, ADD_DAYS, ADD_HOURS, ADD_MINUTES, ADD_MONTHS, ADD_SECONDS, ADD_WEEKS,
+                        ADD_YEARS, CONVERT_TZ, CURRENT_DATE, CURRENT_TIMESTAMP, EXTRACT, LOCALTIMESTAMP, MINUTE, MONTH,
+                        SECOND, SYSDATE, SYSTIMESTAMP, WEEK, YEAR, ST_X, ST_Y, ST_ENDPOINT, ST_ISCLOSED, ST_LENGTH,
+                        ST_NUMPOINTS, ST_POINTN, ST_STARTPOINT, ST_AREA, ST_EXTERIORRING, ST_INTERIORRINGN,
+                        ST_NUMINTERIORRINGS, ST_GEOMETRYN, ST_NUMGEOMETRIES, ST_BUFFER, ST_CENTROID, ST_CONTAINS,
+                        ST_CONVEXHULL, ST_CROSSES, ST_DIFFERENCE, ST_DIMENSION, ST_DISJOINT, ST_DISTANCE, ST_ENVELOPE,
+                        ST_EQUALS, ST_GEOMETRYTYPE, ST_INTERSECTION, ST_INTERSECTS, ST_ISEMPTY, ST_ISSIMPLE,
+                        ST_OVERLAPS, ST_SYMDIFFERENCE, ST_TOUCHES, ST_TRANSFORM, ST_UNION, ST_WITHIN, CAST, BIT_AND,
+                        BIT_OR, BIT_XOR, CASE, CURRENT_USER, BIT_LSHIFT, BIT_RSHIFT, HOUR));
     }
 
     @Test
     void testGetAggregateFunctionCapabilities() {
-        assertThat(this.dialect.getCapabilities().getAggregateFunctionCapabilities(), containsInAnyOrder(COUNT, SUM,
-                MIN, MAX, AVG, STDDEV, STDDEV_POP, STDDEV_SAMP, VARIANCE, VAR_POP, VAR_SAMP));
+        assertThat(this.dialect.getCapabilities().getAggregateFunctionCapabilities(),
+                containsInAnyOrder(COUNT, SUM, MIN, MAX, AVG, STDDEV, STDDEV_POP, STDDEV_SAMP, VARIANCE, VAR_POP,
+                        VAR_SAMP, COUNT_STAR, COUNT_DISTINCT));
     }
 
     @Test
@@ -156,13 +159,12 @@ class MySQLSqlDialectTest {
     @Test
     void testGetSupportedProperties() {
         assertThat(this.dialect.getSupportedProperties(),
-                containsInAnyOrder(SQL_DIALECT_PROPERTY, CONNECTION_NAME_PROPERTY, TABLE_FILTER_PROPERTY,
-                        CATALOG_NAME_PROPERTY, EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY,
-                        LOG_LEVEL_PROPERTY));
+                containsInAnyOrder(CONNECTION_NAME_PROPERTY, TABLE_FILTER_PROPERTY, CATALOG_NAME_PROPERTY,
+                        EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY));
     }
 
     @Test
     void testGetSqlGenerationVisitor() {
-        assertThat(this.dialect.getSqlGenerationVisitor(null), instanceOf(MySQLSqlGenerationVisitor.class));
+        assertThat(this.dialect.getSqlGenerator(null), instanceOf(MySQLSqlGenerationVisitor.class));
     }
 }

@@ -15,8 +15,9 @@ import java.util.Set;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.dialects.*;
+import com.exasol.adapter.dialects.rewriting.ImportIntoTemporaryTableQueryRewriter;
+import com.exasol.adapter.dialects.rewriting.SqlGenerationContext;
 import com.exasol.adapter.jdbc.*;
-import com.exasol.adapter.sql.SqlNodeVisitor;
 import com.exasol.errorreporting.ExaError;
 
 /**
@@ -59,9 +60,9 @@ public class MySQLSqlDialect extends AbstractSqlDialect {
                         ST_CONVEXHULL, ST_CROSSES, ST_DIFFERENCE, ST_DIMENSION, ST_DISJOINT, ST_DISTANCE, ST_ENVELOPE,
                         ST_EQUALS, ST_GEOMETRYTYPE, ST_INTERSECTION, ST_INTERSECTS, ST_ISEMPTY, ST_ISSIMPLE,
                         ST_OVERLAPS, ST_SYMDIFFERENCE, ST_TOUCHES, ST_TRANSFORM, ST_UNION, ST_WITHIN, CAST, BIT_AND,
-                        BIT_OR, BIT_XOR, CASE, CURRENT_USER) //
+                        BIT_OR, BIT_XOR, CASE, CURRENT_USER, BIT_LSHIFT, BIT_RSHIFT, HOUR) //
                 .addAggregateFunction(COUNT, SUM, MIN, MAX, AVG, STDDEV, STDDEV_POP, STDDEV_SAMP, VARIANCE, VAR_POP,
-                        VAR_SAMP) //
+                        VAR_SAMP, COUNT_STAR, COUNT_DISTINCT) //
                 .build();
     }
 
@@ -130,11 +131,11 @@ public class MySQLSqlDialect extends AbstractSqlDialect {
 
     @Override
     protected QueryRewriter createQueryRewriter() {
-        return new ImportIntoQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
+        return new ImportIntoTemporaryTableQueryRewriter(this, createRemoteMetadataReader(), this.connectionFactory);
     }
 
     @Override
-    public SqlNodeVisitor<String> getSqlGenerationVisitor(final SqlGenerationContext context) {
+    public SqlGenerator getSqlGenerator(final SqlGenerationContext context) {
         return new MySQLSqlGenerationVisitor(this, context);
     }
 }
