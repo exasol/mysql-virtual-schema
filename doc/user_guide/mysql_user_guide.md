@@ -51,7 +51,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-8.0.0-mysql-1.0.0.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-9.0.1-mysql-2.0.0.jar;
     %jar /buckets/<BFS service>/<bucket>/mysql-connector-java-<version>.jar;
 /
 ;
@@ -127,18 +127,3 @@ In the following matrix you find combinations of JDBC driver and dialect version
 | Virtual Schema Version | MySQL Version | Driver Name     | Driver Version |
 |------------------------|---------------|-----------------|----------------|
 | Latest                 | MySQL 8.0.20  | MySQL Connector | 8.0.20         |
-
-## Executing Disabled Integration Test
-
-The integration tests are disabled by default, but it is possible to execute them locally. 
-The reason for the tests being disabled is we can only deliver drivers where the license allows redistribution, and it's not the case with MySQL.
-Therefore we cannot include the MySQL JDBC driver, so in order to execute the integration tests you need to download them manually.
-
-### Starting Disabled Integration Test Locally
-
-1. Download the MySQL JDBC driver: 
- - [mysql-connector-java-<version>.jar](https://dev.mysql.com/downloads/connector/j/)
-2. Temporarily put the files into `src/test/resources/integration/driver/mysql` directory.
-3. If the files' names are different (ie, you renamed the file, or it has a different version number, for example) from the mentioned above, edit `src/test/resources/integration/driver/mysql/mysql.properties` and `settings.cfg` files.
-4. Run the tests from an IDE or temporarily add the integration test name into the `maven-failsafe-plugin`'s includes a section and execute `mvn verify` command.
-5. Remove the driver after the test and **do not upload it to the GitHub repository**.

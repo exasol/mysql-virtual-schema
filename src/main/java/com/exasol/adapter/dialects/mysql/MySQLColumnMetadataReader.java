@@ -6,7 +6,7 @@ import java.sql.Types;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.IdentifierConverter;
 import com.exasol.adapter.jdbc.BaseColumnMetadataReader;
-import com.exasol.adapter.jdbc.JdbcTypeDescription;
+import com.exasol.adapter.jdbc.JDBCTypeDescription;
 import com.exasol.adapter.metadata.DataType;
 
 /**
@@ -29,7 +29,7 @@ public class MySQLColumnMetadataReader extends BaseColumnMetadataReader {
     }
 
     @Override
-    public DataType mapJdbcType(final JdbcTypeDescription jdbcTypeDescription) {
+    public DataType mapJdbcType(final JDBCTypeDescription jdbcTypeDescription) {
         switch (jdbcTypeDescription.getJdbcType()) {
         case Types.TIME:
             return DataType.createTimestamp(false);
@@ -42,7 +42,7 @@ public class MySQLColumnMetadataReader extends BaseColumnMetadataReader {
         }
     }
 
-    private DataType convertVarChar(final JdbcTypeDescription jdbcTypeDescription) {
+    private DataType convertVarChar(final JDBCTypeDescription jdbcTypeDescription) {
         final int size = getVarcharSize(jdbcTypeDescription);
         final int octetLength = jdbcTypeDescription.getByteSize();
         final DataType.ExaCharset charset = (octetLength == size) ? DataType.ExaCharset.ASCII
@@ -55,7 +55,7 @@ public class MySQLColumnMetadataReader extends BaseColumnMetadataReader {
         }
     }
 
-    private int getVarcharPrecision(int size) {
+    private int getVarcharPrecision(final int size) {
         if (size == 0) {
             return DataType.MAX_EXASOL_VARCHAR_SIZE;
         } else {
@@ -63,7 +63,7 @@ public class MySQLColumnMetadataReader extends BaseColumnMetadataReader {
         }
     }
 
-    private int getVarcharSize(final JdbcTypeDescription jdbcTypeDescription) {
+    private int getVarcharSize(final JDBCTypeDescription jdbcTypeDescription) {
         final String typeName = jdbcTypeDescription.getTypeName();
         if (typeName.equals(TEXT_DATA_TYPE_NAME)) {
             return TEXT_DATA_TYPE_SIZE;
