@@ -29,7 +29,7 @@ You need to specify the following settings when adding the JDBC driver via EXAOp
 IMPORTANT: Currently you have to **Disable Security Manager** for the driver if you want to connect to MySQL using Virtual Schemas.
 It is necessary because JDBC driver requires a JAVA permission which we do not grant by default.  
 
-## Uploading the JDBC Driver to EXAOperation
+## Uploading the JDBC Driver to Bucket
 
 1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm)
 1. Upload the driver to BucketFS
