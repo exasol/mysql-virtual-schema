@@ -29,7 +29,7 @@ You need to specify the following settings when adding the JDBC driver via EXAOp
 IMPORTANT: Currently you have to **Disable Security Manager** for the driver if you want to connect to MySQL using Virtual Schemas.
 It is necessary because JDBC driver requires a JAVA permission which we do not grant by default.  
 
-## Uploading the JDBC Driver to EXAOperation
+## Uploading the JDBC Driver to BucketFS
 
 1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm)
 1. Upload the driver to BucketFS
@@ -76,7 +76,6 @@ Below you see how a MySQL Virtual Schema is created. Use CATALOG_NAME property t
 CREATE VIRTUAL SCHEMA <virtual schema name>
     USING SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL
     WITH
-    SQL_DIALECT = 'MYSQL'
     CONNECTION_NAME = 'MYSQL_JDBC_CONNECTION'
     CATALOG_NAME = '<database name>';
 ```
@@ -126,4 +125,4 @@ In the following matrix you find combinations of JDBC driver and dialect version
 
 | Virtual Schema Version | MySQL Version | Driver Name     | Driver Version |
 |------------------------|---------------|-----------------|----------------|
-| Latest                 | MySQL 8.0.20  | MySQL Connector | 8.0.20         |
+| Latest                 | MySQL 8.0.23  | MySQL Connector | 8.0.23         |
