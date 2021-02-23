@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 1.0.0, released 2021-02-??
+# Virtual Schema for MySQL 1.0.0, released 2021-02-23
 
 Code name: Removed `SQL_DIALECT` property
 
@@ -10,6 +10,10 @@ The `SQL_DIALECT` property used when executing a `CREATE VIRTUAL SCHEMA` from th
 
 * #4: Unified error messages with `error-reporting-java` 
 * #5: Added new capabilities for scalar and aggregate function.
+
+## Refactoring
+
+* #8: Enabled an integration test.
 
 ## Dependencies Updates
 
