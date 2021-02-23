@@ -76,7 +76,6 @@ Below you see how a MySQL Virtual Schema is created. Use CATALOG_NAME property t
 CREATE VIRTUAL SCHEMA <virtual schema name>
     USING SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL
     WITH
-    SQL_DIALECT = 'MYSQL'
     CONNECTION_NAME = 'MYSQL_JDBC_CONNECTION'
     CATALOG_NAME = '<database name>';
 ```
@@ -126,4 +125,4 @@ In the following matrix you find combinations of JDBC driver and dialect version
 
 | Virtual Schema Version | MySQL Version | Driver Name     | Driver Version |
 |------------------------|---------------|-----------------|----------------|
-| Latest                 | MySQL 8.0.20  | MySQL Connector | 8.0.20         |
+| Latest                 | MySQL 8.0.23  | MySQL Connector | 8.0.23         |
