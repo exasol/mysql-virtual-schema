@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 1.0.0, released 2021-02-23
+# Virtual Schema for MySQL 2.0.0, released 2021-02-25
 
 Code name: Removed `SQL_DIALECT` property
 
