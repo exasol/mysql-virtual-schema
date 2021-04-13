@@ -19,12 +19,12 @@ Now register the driver in EXAOperation:
 
 You need to specify the following settings when adding the JDBC driver via EXAOperation.
 
-| Parameter | Value                                               |
-|-----------|-----------------------------------------------------|
-| Name      | `MYSQL`                                            |
-| Main      | `com.mysql.jdbc.Driver`                          |
-| Prefix    | `jdbc:mysql:`                                     |
-| Files     | `mysql-connector-java-<version>.jar`           |
+| Parameter   | Value                                 |
+|-------------|---------------------------------------|
+| Driver Name | `MYSQL`                               |
+| Main Class  | `com.mysql.jdbc.Driver`               |
+| Prefix      | `jdbc:mysql:`                         |
+| Files       | `mysql-connector-java-<version>.jar`  |
 
 IMPORTANT: Currently you have to **Disable Security Manager** for the driver if you want to connect to MySQL using Virtual Schemas.
 It is necessary because JDBC driver requires a JAVA permission which we do not grant by default.  
