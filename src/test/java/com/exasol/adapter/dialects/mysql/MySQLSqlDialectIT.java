@@ -8,6 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.List;
@@ -63,7 +64,7 @@ class MySQLSqlDialectIT {
     private static MySqlSchema sourceSchema;
 
     @BeforeAll
-    static void beforeAll() throws InterruptedException, BucketAccessException, TimeoutException, SQLException {
+    static void beforeAll() throws BucketAccessException, TimeoutException, SQLException, FileNotFoundException {
         uploadDriverToBucket();
         uploadVsJarToBucket();
         mySqlFactory = new MySqlObjectFactory(mySQLContainer.createConnection(""));
@@ -105,14 +106,14 @@ class MySQLSqlDialectIT {
         }
     }
 
-    private static void uploadDriverToBucket() throws InterruptedException, BucketAccessException, TimeoutException {
+    private static void uploadDriverToBucket() throws BucketAccessException, TimeoutException, FileNotFoundException {
         final Bucket bucket = exasolContainer.getDefaultBucket();
         final Path pathToSettingsFile = Path.of("src", "test", "resources", JDBC_DRIVER_CONFIGURATION_FILE_NAME);
         bucket.uploadFile(pathToSettingsFile, "drivers/jdbc/" + JDBC_DRIVER_CONFIGURATION_FILE_NAME);
         bucket.uploadFile(JDBC_DRIVER_PATH, "drivers/jdbc/" + JDBC_DRIVER_NAME);
     }
 
-    private static void uploadVsJarToBucket() throws InterruptedException, BucketAccessException, TimeoutException {
+    private static void uploadVsJarToBucket() throws BucketAccessException, TimeoutException, FileNotFoundException {
         final Bucket bucket = exasolContainer.getDefaultBucket();
         bucket.uploadFile(PATH_TO_VIRTUAL_SCHEMAS_JAR, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
     }
