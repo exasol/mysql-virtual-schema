@@ -8,26 +8,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.FileNotFoundException;
-import java.nio.file.Path;
+import java.io.IOException;
 import java.sql.*;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.*;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.exasol.bucketfs.Bucket;
-import com.exasol.bucketfs.BucketAccessException;
-import com.exasol.containers.ExasolContainer;
 import com.exasol.dbbuilder.dialects.*;
 import com.exasol.dbbuilder.dialects.exasol.*;
-import com.exasol.dbbuilder.dialects.mysql.MySqlObjectFactory;
 import com.exasol.dbbuilder.dialects.mysql.MySqlSchema;
 import com.exasol.matcher.TypeMatchMode;
 
@@ -38,57 +30,30 @@ import com.exasol.matcher.TypeMatchMode;
 @Tag("integration")
 @Testcontainers
 class MySQLSqlDialectIT {
-    private static final int MYSQL_PORT = 3306;
-    private static final String JDBC_CONNECTION_NAME = "JDBC";
     private static final String MYSQL_SCHEMA = "MYSQL_SCHEMA";
     private static final String MYSQL_SIMPLE_TABLE = "MYSQL_SIMPLE_TABLE";
     private static final String MYSQL_NUMERIC_DATE_DATATYPES_TABLE = "MYSQL_NUMERIC_DATE_TABLE";
     private static final String MYSQL_STRING_DATATYPES_TABLE = "MYSQL_STRING_TABLE";
-    private static final String VIRTUAL_SCHEMA_JDBC = "VIRTUAL_SCHEMA_JDBC";
+    private static final MySQLVirtualSchemaIntegrationTestSetup SETUP = new MySQLVirtualSchemaIntegrationTestSetup();
     private static final String MYSQL_SOURCE_SCHEMA = "SOURCE_SCHEMA";
     private static final String MYSQL_SOURCE_TABLE = "SOURCE_TABLE";
-    private static final String JDBC_DRIVER_NAME = "mysql-connector-java.jar";
-    private static final Path JDBC_DRIVER_PATH = Path.of("target", "mysql-driver", JDBC_DRIVER_NAME);
-    @Container
-    private static final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(
-            EXASOL_DOCKER_IMAGE_REFERENCE).withReuse(true);
-    @Container
-    private static final MySQLContainer<?> mySQLContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE_REFERENCE)
-            .withUsername("root").withPassword("");
-    private static Connection exasolConnection;
-    private static ExasolObjectFactory exasolFactory;
-    private static AdapterScript adapterScript;
-    private static ConnectionDefinition connectionDefinition;
+    private static String virtualSchemaJdbc;
+    private MySqlSchema sourceSchema;
     private VirtualSchema virtualSchema;
-    private static MySqlObjectFactory mySqlFactory;
-    private static MySqlSchema sourceSchema;
 
     @BeforeAll
-    static void beforeAll() throws BucketAccessException, TimeoutException, SQLException, FileNotFoundException {
-        uploadDriverToBucket();
-        uploadVsJarToBucket();
-        mySqlFactory = new MySqlObjectFactory(mySQLContainer.createConnection(""));
-        final MySqlSchema mySqlSchema = mySqlFactory.createSchema(MYSQL_SCHEMA);
+    static void beforeAll() throws SQLException {
+        final MySqlSchema mySqlSchema = SETUP.getMySqlObjectFactory().createSchema(MYSQL_SCHEMA);
         createMySqlSimpleTable(mySqlSchema);
         createMySqlNumericDateTable(mySqlSchema);
         createMySqlStringTable(mySqlSchema);
-        createTestTablesForJoinTests(mySQLContainer.createConnection(""), mySqlSchema.getName());
-        // Exasol setup
-        exasolConnection = exasolContainer.createConnection("");
-        exasolFactory = new ExasolObjectFactory(exasolConnection);
-        final ExasolSchema exasolSchema = exasolFactory.createSchema(SCHEMA_EXASOL);
-        adapterScript = createAdapterScript(JDBC_DRIVER_NAME, exasolSchema);
-        final String connectionString = "jdbc:mysql://" + DOCKER_IP_ADDRESS + ":"
-                + mySQLContainer.getMappedPort(MYSQL_PORT) + "/";
-        connectionDefinition = exasolFactory.createConnectionDefinition(JDBC_CONNECTION_NAME, connectionString,
-                mySQLContainer.getUsername(), mySQLContainer.getPassword());
-        exasolFactory.createVirtualSchemaBuilder(VIRTUAL_SCHEMA_JDBC).adapterScript(adapterScript)
-                .connectionDefinition(connectionDefinition).properties(Map.of("CATALOG_NAME", MYSQL_SCHEMA)).build();
+        createTestTablesForJoinTests(SETUP.getMySqlStatement(), mySqlSchema.getName());
+        virtualSchemaJdbc = SETUP.createVirtualSchema(Collections.emptyMap(), mySqlSchema.getName()).getName();
     }
 
     @AfterAll
-    static void afterAll() throws SQLException {
-        exasolConnection.close();
+    static void afterAll() throws IOException {
+        SETUP.close();
     }
 
     @AfterEach
@@ -106,49 +71,33 @@ class MySQLSqlDialectIT {
         }
     }
 
-    private static void uploadDriverToBucket() throws BucketAccessException, TimeoutException, FileNotFoundException {
-        final Bucket bucket = exasolContainer.getDefaultBucket();
-        final Path pathToSettingsFile = Path.of("src", "test", "resources", JDBC_DRIVER_CONFIGURATION_FILE_NAME);
-        bucket.uploadFile(pathToSettingsFile, "drivers/jdbc/" + JDBC_DRIVER_CONFIGURATION_FILE_NAME);
-        bucket.uploadFile(JDBC_DRIVER_PATH, "drivers/jdbc/" + JDBC_DRIVER_NAME);
-    }
-
-    private static void uploadVsJarToBucket() throws BucketAccessException, TimeoutException, FileNotFoundException {
-        final Bucket bucket = exasolContainer.getDefaultBucket();
-        bucket.uploadFile(PATH_TO_VIRTUAL_SCHEMAS_JAR, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
-    }
-
-    private static void createTestTablesForJoinTests(final Connection connection, final String schemaName)
+    private static void createTestTablesForJoinTests(final Statement statement, final String schemaName)
             throws SQLException {
-        try (final Statement statement = connection.createStatement()) {
-            statement.execute("CREATE TABLE " + schemaName + "." + TABLE_JOIN_1 + "(x INT, y VARCHAR(100))");
-            statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_1 + " VALUES (1,'aaa')");
-            statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_1 + " VALUES (2,'bbb')");
-            statement.execute("CREATE TABLE " + schemaName + "." + TABLE_JOIN_2 + "(x INT, y VARCHAR(100))");
-            statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_2 + " VALUES (2,'bbb')");
-            statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_2 + " VALUES (3,'ccc')");
-        }
+        statement.execute("CREATE TABLE " + schemaName + "." + TABLE_JOIN_1 + "(x INT, y VARCHAR(100))");
+        statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_1 + " VALUES (1,'aaa')");
+        statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_1 + " VALUES (2,'bbb')");
+        statement.execute("CREATE TABLE " + schemaName + "." + TABLE_JOIN_2 + "(x INT, y VARCHAR(100))");
+        statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_2 + " VALUES (2,'bbb')");
+        statement.execute("INSERT INTO " + schemaName + "." + TABLE_JOIN_2 + " VALUES (3,'ccc')");
     }
 
     private ResultSet getExpectedResultSet(final List<String> expectedColumns, final List<String> expectedRows)
             throws SQLException {
-        final Connection connection = getExasolConnection();
-        try (final Statement statement = connection.createStatement()) {
-            final String expectedValues = expectedRows.stream().map(row -> "(" + row + ")")
-                    .collect(Collectors.joining(","));
-            final String qualifiedExpectedTableName = SCHEMA_EXASOL + ".EXPECTED";
-            statement.execute("CREATE OR REPLACE TABLE " + qualifiedExpectedTableName + "("
-                    + String.join(", ", expectedColumns) + ")");
-            statement.execute("INSERT INTO " + qualifiedExpectedTableName + " VALUES" + expectedValues);
-            return statement.executeQuery("SELECT * FROM " + qualifiedExpectedTableName);
-        }
+        final Statement statement = SETUP.getExasolStatement();
+        final String expectedValues = expectedRows.stream().map(row -> "(" + row + ")")
+                .collect(Collectors.joining(","));
+        final String qualifiedExpectedTableName = SCHEMA_EXASOL + ".EXPECTED";
+        statement.execute("CREATE OR REPLACE TABLE " + qualifiedExpectedTableName + "("
+                + String.join(", ", expectedColumns) + ")");
+        statement.execute("INSERT INTO " + qualifiedExpectedTableName + " VALUES" + expectedValues);
+        return statement.executeQuery("SELECT * FROM " + qualifiedExpectedTableName);
+
     }
 
     private ResultSet getActualResultSet(final String query) throws SQLException {
-        final Connection connection = getExasolConnection();
-        try (final Statement statement = connection.createStatement()) {
-            return statement.executeQuery(query);
-        }
+        final Statement statement = SETUP.getExasolStatement();
+        return statement.executeQuery(query);
+
     }
 
     private static void createMySqlSimpleTable(final Schema mySqlSchema) {
@@ -206,7 +155,7 @@ class MySQLSqlDialectIT {
 
     @Test
     void testSelectAll() throws SQLException {
-        final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_SIMPLE_TABLE;
+        final String query = "SELECT * FROM " + virtualSchemaJdbc + "." + MYSQL_SIMPLE_TABLE;
         final ResultSet actualResultSet = getActualResultSet(query);
         final ResultSet expected = getExpectedResultSet(List.of("col1 INT", "col2 BOOLEAN", "col3 VARCHAR(20)"), //
                 List.of("-100, true, 'a'", //
@@ -218,308 +167,9 @@ class MySQLSqlDialectIT {
         assertThat(actualResultSet, matchesResultSet(expected));
     }
 
-    private Connection getExasolConnection() throws SQLException {
-        return exasolContainer.createConnection("");
-    }
-
-    @Nested
-    @DisplayName("Datatype tests")
-    class DatatypeTest {
-        @Test
-        void testBit() throws SQLException {
-            final String query = "SELECT \"BiT_Col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 BOOLEAN"), //
-                    List.of("true", "true", "false", "false"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testTinyInt() throws SQLException {
-            final String query = "SELECT \"tinyint_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 DECIMAL(3,0)"), //
-                    List.of("127", "-127", "0", "0"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testBoolean() throws SQLException {
-            final String query = "SELECT \"BOOL_COL\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 BOOLEAN"), //
-                    List.of("true", "false", "true", "false"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testSmallInt() throws SQLException {
-            final String query = "SELECT \"smallint_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 DECIMAL(5,0)"), //
-                    List.of("32767", "-32768", "0", "0"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testMediumInt() throws SQLException {
-            final String query = "SELECT \"mediumint_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 DECIMAL(7,0)"), //
-                    List.of("8388607", "-8388608", "0", "0"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testInt() throws SQLException {
-            final String query = "SELECT \"int_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 DECIMAL(10,0)"), //
-                    List.of("2147483647", "-2147483648", "0", "0"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testBigInt() throws SQLException {
-            final String query = "SELECT \"bigint_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 DECIMAL(19,0)"), //
-                    List.of("9223372036854775807", "-9223372036854775808", "0", "0"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testDecimal() throws SQLException {
-            final String query = "SELECT \"decimal_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 DECIMAL(5,2)"), //
-                    List.of("999.99", "-999.99", "0", "0"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testFloat() throws SQLException {
-            final String query = "SELECT \"float_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 DOUBLE PRECISION"), //
-                    List.of("999.0001", "-999.9999", "0", "0"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testDouble() throws SQLException {
-            final String query = "SELECT \"double_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 DOUBLE PRECISION"), //
-                    List.of("999.00009", "-999.9999", "0", "0"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testDate() throws SQLException {
-            final String query = "SELECT \"date_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 DATE"), //
-                    List.of("'1000-01-01'", "'9999-12-31'", "null", "null"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testDatetime() throws SQLException {
-            final String query = "SELECT \"datetime_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
-                    List.of("'1000-01-01 00:00:00'", "'9999-12-31 22:59:59'", "null", "null"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testTimestamp() throws SQLException {
-            final String query = "SELECT \"timestamp_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
-                    List.of("'1970-01-01 00:00:01.000000'", "'2037-01-19 03:14:08.0'", "null", "null"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testTime() throws SQLException {
-            final String query = "SELECT \"time_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
-                    List.of("'1970-01-01 16:59:59.000000'", "'1970-01-01 05:34:13.000000'", "null", "null"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testYear() throws SQLException {
-            final String query = "SELECT \"year_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 DATE"), //
-                    List.of("'1901-01-01'", "'2155-01-01'", "'1901-01-01'", "'2069-01-01'"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testUnsupported() {
-            final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_STRING_DATATYPES_TABLE;
-            assertDoesNotThrow(() -> getActualResultSet(query));
-        }
-
-        @Test
-        void testTinyText() throws SQLException {
-            final String query = "SELECT \"tinytext_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_STRING_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 VARCHAR(100)"), //
-                    List.of("'a'", "'b'", "'aaaaaaaaaaaaa'", "'a'"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testText() throws SQLException {
-            final String query = "SELECT \"text_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_STRING_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 VARCHAR(65535)"), //
-                    List.of("'text'", "'text2'", "'text3'", "'text'"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testMediumText() throws SQLException {
-            final String query = "SELECT \"mediumtext_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_STRING_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 VARCHAR(2000000)"), //
-                    List.of("'mediumtext'", "'mediumtext2'", "NULL", "NULL"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testLongText() throws SQLException {
-            final String query = "SELECT \"longtext_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_STRING_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 VARCHAR(2000000)"), //
-                    List.of("'longtext'", "'longtext2'", "NULL", "NULL"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testEnum() throws SQLException {
-            final String query = "SELECT \"enum_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_STRING_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 CHAR"), //
-                    List.of("'1'", "'2'", "'3'", "NULL"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testSet() throws SQLException {
-            final String query = "SELECT \"set_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_STRING_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 CHAR"), //
-                    List.of("'1'", "'1'", "NULL", "NULL"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testVarchar() throws SQLException {
-            final String query = "SELECT \"varchar_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "."
-                    + MYSQL_STRING_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 VARCHAR(100)"), //
-                    List.of("'ab'", "'a'", "''", "NULL"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testChar() throws SQLException {
-            final String query = "SELECT \"char_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_STRING_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 CHAR(255)"), //
-                    List.of("'asd24'", "'11111'", "''", "NULL"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-    }
-
-    @Nested
-    @DisplayName("Join test")
-    class JoinTest {
-        @Test
-        void testInnerJoin() throws SQLException {
-            final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_1 + " a INNER JOIN  "
-                    + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_2 + " b ON a.\"x\"=b.\"x\"";
-            final ResultSet expected = getExpectedResultSet(
-                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
-                    List.of("2,'bbb', 2,'bbb'"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testInnerJoinWithProjection() throws SQLException {
-            final String query = "SELECT b.\"y\" || " + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_1 + ".\"y\" FROM "
-                    + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_1 + " INNER JOIN  " + VIRTUAL_SCHEMA_JDBC + "."
-                    + TABLE_JOIN_2 + " b ON " + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_1 + ".\"x\"=b.\"x\"";
-            final ResultSet expected = getExpectedResultSet(List.of("y VARCHAR(100)"), //
-                    List.of("'bbbbbb'"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testLeftJoin() throws SQLException {
-            final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_1 + " a LEFT OUTER JOIN "
-                    + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_2 + " b ON a.\"x\"=b.\"x\" ORDER BY a.\"x\"";
-            final ResultSet expected = getExpectedResultSet(
-                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
-                    List.of("1, 'aaa', null, null", //
-                            "2, 'bbb', 2, 'bbb'"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testRightJoin() throws SQLException {
-            final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_1 + " a RIGHT OUTER JOIN "
-                    + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_2 + " b ON a.\"x\"=b.\"x\" ORDER BY a.\"x\"";
-            final ResultSet expected = getExpectedResultSet(
-                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
-                    List.of("null, null, 3, 'ccc'", //
-                            "2, 'bbb', 2, 'bbb'"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testFullOuterJoin() throws SQLException {
-            final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_1 + " a FULL OUTER JOIN "
-                    + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_2 + " b ON a.\"x\"=b.\"x\" ORDER BY a.\"x\"";
-            final ResultSet expected = getExpectedResultSet(
-                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
-                    List.of("1, 'aaa', null, null", //
-                            "2, 'bbb', 2, 'bbb'", //
-                            "null, null, 3, 'ccc'"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testRightJoinWithComplexCondition() throws SQLException {
-            final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_1 + " a RIGHT OUTER JOIN "
-                    + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_2
-                    + " b ON a.\"x\"||a.\"y\"=b.\"x\"||b.\"y\" ORDER BY a.\"x\"";
-            final ResultSet expected = getExpectedResultSet(
-                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
-                    List.of("null, null, 3, 'ccc'", //
-                            "2, 'bbb', 2, 'bbb'"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testFullOuterJoinWithComplexCondition() throws SQLException {
-            final String query = "SELECT * FROM " + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_1 + " a FULL OUTER JOIN "
-                    + VIRTUAL_SCHEMA_JDBC + "." + TABLE_JOIN_2 + " b ON a.\"x\"-b.\"x\"=0 ORDER BY a.\"x\"";
-            final ResultSet expected = getExpectedResultSet(
-                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
-                    List.of("1, 'aaa', null, null", //
-                            "2, 'bbb', 2, 'bbb'", //
-                            "null, null, 3, 'ccc'"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-    }
-
     @Test
     void testAggregateGroupByColumn() throws SQLException {
-        final String query = "SELECT \"bool_col\", min(\"int_col\") FROM " + VIRTUAL_SCHEMA_JDBC + "."
+        final String query = "SELECT \"bool_col\", min(\"int_col\") FROM " + virtualSchemaJdbc + "."
                 + MYSQL_SIMPLE_TABLE + " GROUP BY \"bool_col\"";
         final ResultSet expected = getExpectedResultSet(List.of("bool_col BOOLEAN", "int_col DECIMAL(10,0)"),
                 List.of("true, -100", //
@@ -529,7 +179,7 @@ class MySQLSqlDialectIT {
 
     @Test
     void testAggregateHaving() throws SQLException {
-        final String query = "SELECT \"bool_col\", min(\"int_col\") FROM " + VIRTUAL_SCHEMA_JDBC + "."
+        final String query = "SELECT \"bool_col\", min(\"int_col\") FROM " + virtualSchemaJdbc + "."
                 + MYSQL_SIMPLE_TABLE + " GROUP BY \"bool_col\" HAVING MIN(\"int_col\") < 0";
         final ResultSet expected = getExpectedResultSet(List.of("bool_col BOOLEAN", "int_col DECIMAL(10,0)"),
                 List.of("true, -100", //
@@ -541,7 +191,7 @@ class MySQLSqlDialectIT {
     // =, !=, <, <=, >, >=
     void testComparisonPredicates() throws SQLException {
         final String query = "SELECT \"int_col\", \"int_col\" = 60, \"int_col\" != 60, \"int_col\" < 60, "
-                + "\"int_col\" <= 60, \"int_col\" > 60, \"int_col\" >= 60 FROM " + VIRTUAL_SCHEMA_JDBC + "."
+                + "\"int_col\" <= 60, \"int_col\" > 60, \"int_col\" >= 60 FROM " + virtualSchemaJdbc + "."
                 + MYSQL_SIMPLE_TABLE + " WHERE \"int_col\" = 0";
         final ResultSet expected = getExpectedResultSet(
                 List.of("int_col DECIMAL(10,0)", "b1 DECIMAL(19,0)", "b2 DECIMAL(19,0)", "b3 DECIMAL(19,0)",
@@ -553,7 +203,7 @@ class MySQLSqlDialectIT {
     @Test
     // NOT, AND, OR
     void testLogicalPredicates() throws SQLException {
-        final String query = "SELECT \"int_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_SIMPLE_TABLE
+        final String query = "SELECT \"int_col\" FROM " + virtualSchemaJdbc + "." + MYSQL_SIMPLE_TABLE
                 + " WHERE (\"int_col\" < 0 or \"int_col\" > 0) AND NOT (\"int_col\" is null)";
         final ResultSet expected = getExpectedResultSet(List.of("int_col DECIMAL(10,0)"), //
                 List.of("-100", //
@@ -567,7 +217,7 @@ class MySQLSqlDialectIT {
     @Test
     // LIKE, LIKE ESCAPE (not pushed down)
     void testLikePredicates() throws SQLException {
-        final String query = "SELECT \"varchar_col\", \"varchar_col\" LIKE 'a%' ESCAPE 'a' FROM " + VIRTUAL_SCHEMA_JDBC
+        final String query = "SELECT \"varchar_col\", \"varchar_col\" LIKE 'a%' ESCAPE 'a' FROM " + virtualSchemaJdbc
                 + "." + MYSQL_SIMPLE_TABLE + " WHERE (\"varchar_col\" LIKE 'a%')";
         final ResultSet expected = getExpectedResultSet(List.of("varchar_col VARCHAR(10)", "bool_col BOOLEAN"),
                 List.of("'a', false", //
@@ -581,7 +231,7 @@ class MySQLSqlDialectIT {
     // BETWEEN, IN, IS NULL, !=NULL(rewritten to "IS NOT NULL")
     void testMiscPredicates() throws SQLException {
         final String query = "SELECT \"int_col\", \"int_col\" in (56, 61), \"int_col\" is null, \"int_col\" != null"
-                + " FROM " + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_SIMPLE_TABLE + " WHERE \"int_col\" between -10 and 51";
+                + " FROM " + virtualSchemaJdbc + "." + MYSQL_SIMPLE_TABLE + " WHERE \"int_col\" between -10 and 51";
         final ResultSet expected = getExpectedResultSet(
                 List.of("int_col DECIMAL(10,0)", "b1 BOOLEAN", "b2 BOOLEAN", "b3 BOOLEAN"), //
                 List.of("-1, false, false, false", //
@@ -594,7 +244,7 @@ class MySQLSqlDialectIT {
     @Test
     void testCountSumAggregateFunction() throws SQLException {
         final String query = "SELECT COUNT(\"int_col\"), COUNT(*), COUNT(DISTINCT \"int_col\"), SUM(\"int_col\"), "
-                + "SUM(DISTINCT \"int_col\") FROM " + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_SIMPLE_TABLE;
+                + "SUM(DISTINCT \"int_col\") FROM " + virtualSchemaJdbc + "." + MYSQL_SIMPLE_TABLE;
         final ResultSet expected = getExpectedResultSet(
                 List.of("a DECIMAL(10,0)", "b DECIMAL(10,0)", "c DECIMAL(10,0)", "d DECIMAL(19,0)", "e DECIMAL(19,0)"),
                 List.of("6, 6, 6, 59, 59"));
@@ -603,7 +253,7 @@ class MySQLSqlDialectIT {
 
     @Test
     void testAvgMinMaxAggregateFunction() throws SQLException {
-        final String query = "SELECT AVG(\"int_col\"), MIN(\"int_col\"), MAX(\"int_col\") FROM " + VIRTUAL_SCHEMA_JDBC
+        final String query = "SELECT AVG(\"int_col\"), MIN(\"int_col\"), MAX(\"int_col\") FROM " + virtualSchemaJdbc
                 + "." + MYSQL_SIMPLE_TABLE;
         final ResultSet expected = getExpectedResultSet(
                 List.of("a DECIMAL(14,4)", "b DECIMAL(10,0)", "c DECIMAL(10,0)"), //
@@ -614,7 +264,7 @@ class MySQLSqlDialectIT {
     @Test
     void testCastedStringFunctions() throws SQLException {
         final String query = "SELECT concat(upper(\"varchar_col\"),lower(repeat(\"varchar_col\",2))) FROM "
-                + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_SIMPLE_TABLE;
+                + virtualSchemaJdbc + "." + MYSQL_SIMPLE_TABLE;
         final ResultSet expected = getExpectedResultSet(List.of("a VARCHAR(100)"), //
                 List.of("'Aaa'", //
                         "'ABBBabbbabbb'", //
@@ -628,7 +278,7 @@ class MySQLSqlDialectIT {
     @Test
     void testRewrittenDivAndModFunctions() throws SQLException {
         final String query = "SELECT DIV(\"int_col\",\"int_col\"), mod(\"int_col\",\"int_col\") FROM "
-                + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_SIMPLE_TABLE;
+                + virtualSchemaJdbc + "." + MYSQL_SIMPLE_TABLE;
         final ResultSet expected = getExpectedResultSet(List.of("a DECIMAL(19,0)", "b DECIMAL(19,0)"), //
                 List.of("1, 0", //
                         "1, 0", //
@@ -641,7 +291,7 @@ class MySQLSqlDialectIT {
 
     @Test
     void testRewrittenSubStringFunction() throws SQLException {
-        final String query = "SELECT substring(\"varchar_col\" FROM 1 FOR 2) FROM " + VIRTUAL_SCHEMA_JDBC + "."
+        final String query = "SELECT substring(\"varchar_col\" FROM 1 FOR 2) FROM " + virtualSchemaJdbc + "."
                 + MYSQL_SIMPLE_TABLE;
         final ResultSet expected = getExpectedResultSet(List.of("a VARCHAR(100)"), //
                 List.of("'a'", //
@@ -655,7 +305,7 @@ class MySQLSqlDialectIT {
 
     @Test
     void testOrderByLimit() throws SQLException {
-        final String query = "SELECT \"bool_col\", \"int_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_SIMPLE_TABLE
+        final String query = "SELECT \"bool_col\", \"int_col\" FROM " + virtualSchemaJdbc + "." + MYSQL_SIMPLE_TABLE
                 + " ORDER BY \"int_col\" LIMIT 3";
         final ResultSet expected = getExpectedResultSet(List.of("a BOOLEAN", "b DECIMAL(10,0)"), //
                 List.of("true, -100", //
@@ -666,7 +316,7 @@ class MySQLSqlDialectIT {
 
     @Test
     void testOrderByLimitOffset() throws SQLException {
-        final String query = "SELECT \"bool_col\", \"int_col\" FROM " + VIRTUAL_SCHEMA_JDBC + "." + MYSQL_SIMPLE_TABLE
+        final String query = "SELECT \"bool_col\", \"int_col\" FROM " + virtualSchemaJdbc + "." + MYSQL_SIMPLE_TABLE
                 + " ORDER BY \"int_col\" LIMIT 2 OFFSET 1";
         final ResultSet expected = getExpectedResultSet(List.of("a BOOLEAN", "b DECIMAL(10,0)"), //
                 List.of("false, -1", //
@@ -677,26 +327,31 @@ class MySQLSqlDialectIT {
     @Test
     void testLeftShiftScalarFunction() {
         createSourceTable(List.of("INT_COL_1", "INT_COL_2"), List.of("INT", "INT"), new Object[][] { { 10, 3 } });
-        this.virtualSchema = createVirtualSchema();
+        this.virtualSchema = SETUP.createVirtualSchema(Collections.emptyMap(), MYSQL_SOURCE_SCHEMA);
         final String query = "SELECT BIT_LSHIFT(INT_COL_1, INT_COL_2) FROM " + this.virtualSchema.getName() + "."
                 + MYSQL_SOURCE_TABLE;
         assertVsQuery(query, table().row(80).matches(TypeMatchMode.NO_JAVA_TYPE_CHECK));
     }
 
     private void createSourceTable(final List<String> columnNames, final List<String> types, final Object[][] values) {
-        sourceSchema = mySqlFactory.createSchema(MYSQL_SOURCE_SCHEMA);
+        sourceSchema = SETUP.getMySqlObjectFactory().createSchema(MYSQL_SOURCE_SCHEMA);
         final Table table = sourceSchema.createTable(MYSQL_SOURCE_TABLE, columnNames, types);
         for (final Object[] value : values) {
             table.insert(value);
         }
     }
 
-    private VirtualSchema createVirtualSchema() {
-        return exasolFactory.createVirtualSchemaBuilder("THE_VS") //
-                .adapterScript(adapterScript) //
-                .connectionDefinition(connectionDefinition) //
-                .properties(Map.of("CATALOG_NAME", MYSQL_SOURCE_SCHEMA)) //
-                .build();
+    private ResultSet query(final String sql) throws SQLException {
+        return SETUP.getExasolStatement().executeQuery(sql);
+    }
+
+    @Test
+    void testRightShiftScalarFunction() {
+        createSourceTable(List.of("INT_COL_1", "INT_COL_2"), List.of("INT", "INT"), new Object[][] { { 10, 3 } });
+        virtualSchema = SETUP.createVirtualSchema(Collections.emptyMap(), MYSQL_SOURCE_SCHEMA);
+        final String query = "SELECT BIT_RSHIFT(INT_COL_1, INT_COL_2) FROM " + this.virtualSchema.getName() + "."
+                + MYSQL_SOURCE_TABLE;
+        assertVsQuery(query, table().row(1).matches(TypeMatchMode.NO_JAVA_TYPE_CHECK));
     }
 
     private void assertVsQuery(final String sql, final Matcher<ResultSet> expected) {
@@ -707,25 +362,307 @@ class MySQLSqlDialectIT {
         }
     }
 
-    private ResultSet query(final String sql) throws SQLException {
-        return exasolConnection.createStatement().executeQuery(sql);
-    }
-
-    @Test
-    void testRightShiftScalarFunction() {
-        createSourceTable(List.of("INT_COL_1", "INT_COL_2"), List.of("INT", "INT"), new Object[][] { { 10, 3 } });
-        this.virtualSchema = createVirtualSchema();
-        final String query = "SELECT BIT_RSHIFT(INT_COL_1, INT_COL_2) FROM " + this.virtualSchema.getName() + "."
-                + MYSQL_SOURCE_TABLE;
-        assertVsQuery(query, table().row(1).matches(TypeMatchMode.NO_JAVA_TYPE_CHECK));
-    }
-
     @Test
     void testHourScalarFunction() {
         createSourceTable(List.of("TIMESTAMP_COL"), List.of("TIMESTAMP"), new Object[][] { { "2021-02-16 11:48:01" } });
-        this.virtualSchema = createVirtualSchema();
+        this.virtualSchema = SETUP.createVirtualSchema(Collections.emptyMap(), MYSQL_SOURCE_SCHEMA);
         final String query = "SELECT HOUR(timestamp_col) FROM " + this.virtualSchema.getName() + "."
                 + MYSQL_SOURCE_TABLE;
         assertVsQuery(query, table().row(11).matches(TypeMatchMode.NO_JAVA_TYPE_CHECK));
+    }
+
+    @Nested
+    @DisplayName("Datatype tests")
+    class DatatypeTest {
+        @Test
+        void testBit() throws SQLException {
+            final String query = "SELECT \"BiT_Col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 BOOLEAN"), //
+                    List.of("true", "true", "false", "false"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testTinyInt() throws SQLException {
+            final String query = "SELECT \"tinyint_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 DECIMAL(3,0)"), //
+                    List.of("127", "-127", "0", "0"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testBoolean() throws SQLException {
+            final String query = "SELECT \"BOOL_COL\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 BOOLEAN"), //
+                    List.of("true", "false", "true", "false"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testSmallInt() throws SQLException {
+            final String query = "SELECT \"smallint_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 DECIMAL(5,0)"), //
+                    List.of("32767", "-32768", "0", "0"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testMediumInt() throws SQLException {
+            final String query = "SELECT \"mediumint_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 DECIMAL(7,0)"), //
+                    List.of("8388607", "-8388608", "0", "0"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testInt() throws SQLException {
+            final String query = "SELECT \"int_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 DECIMAL(10,0)"), //
+                    List.of("2147483647", "-2147483648", "0", "0"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testBigInt() throws SQLException {
+            final String query = "SELECT \"bigint_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 DECIMAL(19,0)"), //
+                    List.of("9223372036854775807", "-9223372036854775808", "0", "0"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testDecimal() throws SQLException {
+            final String query = "SELECT \"decimal_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 DECIMAL(5,2)"), //
+                    List.of("999.99", "-999.99", "0", "0"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testFloat() throws SQLException {
+            final String query = "SELECT \"float_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 DOUBLE PRECISION"), //
+                    List.of("999.0001", "-999.9999", "0", "0"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testDouble() throws SQLException {
+            final String query = "SELECT \"double_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 DOUBLE PRECISION"), //
+                    List.of("999.00009", "-999.9999", "0", "0"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testDate() throws SQLException {
+            final String query = "SELECT \"date_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 DATE"), //
+                    List.of("'1000-01-01'", "'9999-12-31'", "null", "null"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testDatetime() throws SQLException {
+            final String query = "SELECT \"datetime_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
+                    List.of("'1000-01-01 00:00:00'", "'9999-12-31 22:59:59'", "null", "null"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testTimestamp() throws SQLException {
+            final String query = "SELECT \"timestamp_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
+                    List.of("'1970-01-01 00:00:01.000000'", "'2037-01-19 03:14:08.0'", "null", "null"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testTime() throws SQLException {
+            final String query = "SELECT \"time_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
+                    List.of("'1970-01-01 16:59:59.000000'", "'1970-01-01 05:34:13.000000'", "null", "null"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testYear() throws SQLException {
+            final String query = "SELECT \"year_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 DATE"), //
+                    List.of("'1901-01-01'", "'2155-01-01'", "'1901-01-01'", "'2069-01-01'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testUnsupported() {
+            final String query = "SELECT * FROM " + virtualSchemaJdbc + "." + MYSQL_STRING_DATATYPES_TABLE;
+            assertDoesNotThrow(() -> getActualResultSet(query));
+        }
+
+        @Test
+        void testTinyText() throws SQLException {
+            final String query = "SELECT \"tinytext_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_STRING_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 VARCHAR(100)"), //
+                    List.of("'a'", "'b'", "'aaaaaaaaaaaaa'", "'a'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testText() throws SQLException {
+            final String query = "SELECT \"text_col\" FROM " + virtualSchemaJdbc + "." + MYSQL_STRING_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 VARCHAR(65535)"), //
+                    List.of("'text'", "'text2'", "'text3'", "'text'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testMediumText() throws SQLException {
+            final String query = "SELECT \"mediumtext_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_STRING_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 VARCHAR(2000000)"), //
+                    List.of("'mediumtext'", "'mediumtext2'", "NULL", "NULL"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testLongText() throws SQLException {
+            final String query = "SELECT \"longtext_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_STRING_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 VARCHAR(2000000)"), //
+                    List.of("'longtext'", "'longtext2'", "NULL", "NULL"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testEnum() throws SQLException {
+            final String query = "SELECT \"enum_col\" FROM " + virtualSchemaJdbc + "." + MYSQL_STRING_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 CHAR"), //
+                    List.of("'1'", "'2'", "'3'", "NULL"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testSet() throws SQLException {
+            final String query = "SELECT \"set_col\" FROM " + virtualSchemaJdbc + "." + MYSQL_STRING_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 CHAR"), //
+                    List.of("'1'", "'1'", "NULL", "NULL"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testVarchar() throws SQLException {
+            final String query = "SELECT \"varchar_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_STRING_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 VARCHAR(100)"), //
+                    List.of("'ab'", "'a'", "''", "NULL"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testChar() throws SQLException {
+            final String query = "SELECT \"char_col\" FROM " + virtualSchemaJdbc + "." + MYSQL_STRING_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 CHAR(255)"), //
+                    List.of("'asd24'", "'11111'", "''", "NULL"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+    }
+
+    @Nested
+    @DisplayName("Join test")
+    class JoinTest {
+        @Test
+        void testInnerJoin() throws SQLException {
+            final String query = "SELECT * FROM " + virtualSchemaJdbc + "." + TABLE_JOIN_1 + " a INNER JOIN  "
+                    + virtualSchemaJdbc + "." + TABLE_JOIN_2 + " b ON a.\"x\"=b.\"x\"";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                    List.of("2,'bbb', 2,'bbb'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testInnerJoinWithProjection() throws SQLException {
+            final String query = "SELECT b.\"y\" || " + virtualSchemaJdbc + "." + TABLE_JOIN_1 + ".\"y\" FROM "
+                    + virtualSchemaJdbc + "." + TABLE_JOIN_1 + " INNER JOIN  " + virtualSchemaJdbc + "." + TABLE_JOIN_2
+                    + " b ON " + virtualSchemaJdbc + "." + TABLE_JOIN_1 + ".\"x\"=b.\"x\"";
+            final ResultSet expected = getExpectedResultSet(List.of("y VARCHAR(100)"), //
+                    List.of("'bbbbbb'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testLeftJoin() throws SQLException {
+            final String query = "SELECT * FROM " + virtualSchemaJdbc + "." + TABLE_JOIN_1 + " a LEFT OUTER JOIN "
+                    + virtualSchemaJdbc + "." + TABLE_JOIN_2 + " b ON a.\"x\"=b.\"x\" ORDER BY a.\"x\"";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                    List.of("1, 'aaa', null, null", //
+                            "2, 'bbb', 2, 'bbb'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testRightJoin() throws SQLException {
+            final String query = "SELECT * FROM " + virtualSchemaJdbc + "." + TABLE_JOIN_1 + " a RIGHT OUTER JOIN "
+                    + virtualSchemaJdbc + "." + TABLE_JOIN_2 + " b ON a.\"x\"=b.\"x\" ORDER BY a.\"x\"";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                    List.of("null, null, 3, 'ccc'", //
+                            "2, 'bbb', 2, 'bbb'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testFullOuterJoin() throws SQLException {
+            final String query = "SELECT * FROM " + virtualSchemaJdbc + "." + TABLE_JOIN_1 + " a FULL OUTER JOIN "
+                    + virtualSchemaJdbc + "." + TABLE_JOIN_2 + " b ON a.\"x\"=b.\"x\" ORDER BY a.\"x\"";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                    List.of("1, 'aaa', null, null", //
+                            "2, 'bbb', 2, 'bbb'", //
+                            "null, null, 3, 'ccc'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testRightJoinWithComplexCondition() throws SQLException {
+            final String query = "SELECT * FROM " + virtualSchemaJdbc + "." + TABLE_JOIN_1 + " a RIGHT OUTER JOIN "
+                    + virtualSchemaJdbc + "." + TABLE_JOIN_2
+                    + " b ON a.\"x\"||a.\"y\"=b.\"x\"||b.\"y\" ORDER BY a.\"x\"";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                    List.of("null, null, 3, 'ccc'", //
+                            "2, 'bbb', 2, 'bbb'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testFullOuterJoinWithComplexCondition() throws SQLException {
+            final String query = "SELECT * FROM " + virtualSchemaJdbc + "." + TABLE_JOIN_1 + " a FULL OUTER JOIN "
+                    + virtualSchemaJdbc + "." + TABLE_JOIN_2 + " b ON a.\"x\"-b.\"x\"=0 ORDER BY a.\"x\"";
+            final ResultSet expected = getExpectedResultSet(
+                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
+                    List.of("1, 'aaa', null, null", //
+                            "2, 'bbb', 2, 'bbb'", //
+                            "null, null, 3, 'ccc'"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
     }
 }
