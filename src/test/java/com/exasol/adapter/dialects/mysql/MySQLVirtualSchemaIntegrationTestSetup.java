@@ -35,7 +35,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     private static final Logger LOGGER = Logger.getLogger(MySQLVirtualSchemaIntegrationTestSetup.class.getName());
     private static final String JDBC_DRIVER_NAME = "mysql-connector-java.jar";
     private static final Path JDBC_DRIVER_PATH = Path.of("target", "mysql-driver", JDBC_DRIVER_NAME);
-    private final Statement postgresStatement;
+    private final Statement mySqlStatement;
     private final MySQLContainer<?> mySqlContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE_REFERENCE)
             .withUsername("root").withPassword("");
     private final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(
@@ -60,7 +60,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
             this.exasolConection = this.exasolContainer.createConnection("");
             this.exasolStatement = this.exasolConection.createStatement();
             this.mySqlConnection = this.mySqlContainer.createConnection("");
-            this.postgresStatement = this.mySqlConnection.createStatement();
+            this.mySqlStatement = this.mySqlConnection.createStatement();
             final UdfTestSetup udfTestSetup = new UdfTestSetup(getTestHostIpFromInsideExasol(),
                     this.exasolContainer.getDefaultBucket());
             this.exasolFactory = new ExasolObjectFactory(this.exasolContainer.createConnection(""),
@@ -133,7 +133,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     }
 
     public Statement getMySqlStatement() {
-        return this.postgresStatement;
+        return this.mySqlStatement;
     }
 
     public Statement getExasolStatement() {
@@ -157,7 +157,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
         try {
             this.exasolStatement.close();
             this.exasolConection.close();
-            this.postgresStatement.close();
+            this.mySqlStatement.close();
             this.mySqlConnection.close();
             this.exasolContainer.stop();
             this.mySqlContainer.stop();

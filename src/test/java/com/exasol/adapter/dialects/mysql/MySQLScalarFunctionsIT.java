@@ -38,14 +38,13 @@ public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
         return new MySqlTestSetup();
     }
 
-    private static class PostgreSQLSingleTableVirtualSchemaTestSetup implements VirtualSchemaTestSetup {
+    private static class MySQLSingleTableVirtualSchemaTestSetup implements VirtualSchemaTestSetup {
         private final VirtualSchema virtualSchema;
-        private final Schema postgresqlSchema;
+        private final Schema mySqlSchema;
 
-        private PostgreSQLSingleTableVirtualSchemaTestSetup(final VirtualSchema virtualSchema,
-                final Schema postgresqlSchema) {
+        private MySQLSingleTableVirtualSchemaTestSetup(final VirtualSchema virtualSchema, final Schema mySqlSchema) {
             this.virtualSchema = virtualSchema;
-            this.postgresqlSchema = postgresqlSchema;
+            this.mySqlSchema = mySqlSchema;
         }
 
         @Override
@@ -56,7 +55,7 @@ public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
         @Override
         public void close() {
             this.virtualSchema.drop();
-            this.postgresqlSchema.drop();
+            this.mySqlSchema.drop();
         }
     }
 
@@ -84,7 +83,7 @@ public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
                 }
                 final VirtualSchema virtualSchema = SETUP.createVirtualSchema(Collections.emptyMap(),
                         mySqlSchema.getName());
-                return new PostgreSQLSingleTableVirtualSchemaTestSetup(virtualSchema, mySqlSchema);
+                return new MySQLSingleTableVirtualSchemaTestSetup(virtualSchema, mySqlSchema);
             };
         }
 
