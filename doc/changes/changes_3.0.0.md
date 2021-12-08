@@ -5,6 +5,7 @@ Code name:
 ## Refactoring
 
 * #11: Added virtual-schema-shared-integration-tests
+* #14: Inverted scalar function capability definition
 
 ## Dependency Updates
 

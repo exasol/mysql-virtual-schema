@@ -6,14 +6,15 @@ import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
 import static com.exasol.adapter.capabilities.ScalarFunctionCapability.*;
-import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_INTERSECTION;
-import static com.exasol.adapter.capabilities.ScalarFunctionCapability.ST_UNION;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
+import com.exasol.adapter.capabilities.ScalarFunctionCapability;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.dialects.rewriting.ImportIntoTemporaryTableQueryRewriter;
 import com.exasol.adapter.dialects.rewriting.SqlGenerationContext;
@@ -27,6 +28,17 @@ import com.exasol.errorreporting.ExaError;
  */
 public class MySQLSqlDialect extends AbstractSqlDialect {
     static final String NAME = "MYSQL";
+    private static final Set<ScalarFunctionCapability> DISABLED_SCALAR_FUNCTION = Set.of(
+            // Not implemented (without or unknown reason)
+            ADD, BIT_CHECK, BIT_LROTATE, BIT_NOT, BIT_RROTATE, BIT_SET, BIT_TO_NUM, CHR, COLOGNE_PHONETIC, COSH,
+            CURRENT_CLUSTER, CURRENT_SCHEMA, CURRENT_SESSION, CURRENT_STATEMENT, DATE_TRUNC, DAY, DAYS_BETWEEN,
+            DBTIMEZONE, DUMP, EDIT_DISTANCE, FLOAT_DIV, FROM_POSIX_TIME, HASHTYPE_MD5, HASHTYPE_SHA1, HASHTYPE_SHA256,
+            HASHTYPE_SHA512, HASHTYPE_TIGER, HASH_MD5, HASH_SHA1, HASH_SHA256, HASH_SHA512, HASH_TIGER, HOURS_BETWEEN,
+            INITCAP, IS_BOOLEAN, IS_DATE, IS_DSINTERVAL, IS_NUMBER, IS_TIMESTAMP, IS_YMINTERVAL, JSON_VALUE,
+            MINUTES_BETWEEN, MIN_SCALE, MONTHS_BETWEEN, MULT, NEG, NULLIFZERO, NUMTODSINTERVAL, NUMTOYMINTERVAL,
+            POSIX_TIME, SECONDS_BETWEEN, SESSIONTIMEZONE, SESSION_PARAMETER, SINH, ST_BOUNDARY, ST_FORCE2D, ST_ISRING,
+            ST_SETSRID, SUB, SYS_GUID, TANH, TO_CHAR, TO_DATE, TO_DSINTERVAL, TO_NUMBER, TO_TIMESTAMP, TO_YMINTERVAL,
+            TRANSLATE, TRUNC, TYPEOF, UNICODE, UNICODECHR, YEARS_BETWEEN, ZEROIFNULL);
     private static final Capabilities CAPABILITIES = createCapabilityList();
 
     /**
@@ -48,19 +60,7 @@ public class MySQLSqlDialect extends AbstractSqlDialect {
                         JOIN_TYPE_INNER, JOIN_TYPE_LEFT_OUTER, JOIN_TYPE_RIGHT_OUTER, JOIN_CONDITION_EQUI) //
                 .addLiteral(NULL, BOOL, DATE, TIMESTAMP, TIMESTAMP_UTC, DOUBLE, EXACTNUMERIC, STRING, INTERVAL) //
                 .addPredicate(AND, OR, NOT, EQUAL, NOTEQUAL, LESS, LESSEQUAL, LIKE, BETWEEN, IS_NULL, IS_NOT_NULL) //
-                .addScalarFunction(ABS, ACOS, ASIN, ATAN, ATAN2, CEIL, COS, COT, DEGREES, DIV, EXP, FLOOR, GREATEST,
-                        LEAST, LN, LOG, MOD, POWER, RADIANS, RAND, ROUND, SIGN, SIN, SQRT, TAN, ASCII, BIT_LENGTH,
-                        CONCAT, INSERT, INSTR, LENGTH, LOCATE, LOWER, LPAD, LTRIM, OCTET_LENGTH, REGEXP_INSTR,
-                        REGEXP_REPLACE, REGEXP_SUBSTR, REPEAT, REPLACE, REVERSE, RIGHT, RPAD, RTRIM, SOUNDEX, SPACE,
-                        SUBSTR, TRIM, UPPER, ADD_DAYS, ADD_HOURS, ADD_MINUTES, ADD_MONTHS, ADD_SECONDS, ADD_WEEKS,
-                        ADD_YEARS, CONVERT_TZ, CURRENT_DATE, CURRENT_TIMESTAMP, EXTRACT, LOCALTIMESTAMP, MINUTE, MONTH,
-                        SECOND, SYSDATE, SYSTIMESTAMP, WEEK, YEAR, ST_X, ST_Y, ST_ENDPOINT, ST_ISCLOSED, ST_LENGTH,
-                        ST_NUMPOINTS, ST_POINTN, ST_STARTPOINT, ST_AREA, ST_EXTERIORRING, ST_INTERIORRINGN,
-                        ST_NUMINTERIORRINGS, ST_GEOMETRYN, ST_NUMGEOMETRIES, ST_BUFFER, ST_CENTROID, ST_CONTAINS,
-                        ST_CONVEXHULL, ST_CROSSES, ST_DIFFERENCE, ST_DIMENSION, ST_DISJOINT, ST_DISTANCE, ST_ENVELOPE,
-                        ST_EQUALS, ST_GEOMETRYTYPE, ST_INTERSECTION, ST_INTERSECTS, ST_ISEMPTY, ST_ISSIMPLE,
-                        ST_OVERLAPS, ST_SYMDIFFERENCE, ST_TOUCHES, ST_TRANSFORM, ST_UNION, ST_WITHIN, CAST, BIT_AND,
-                        BIT_OR, BIT_XOR, CASE, CURRENT_USER, BIT_LSHIFT, BIT_RSHIFT, HOUR) //
+                .addScalarFunction(getEnabledScalarFunctionCapabilities()) //
                 .addAggregateFunction(COUNT, SUM, MIN, MAX, AVG, STDDEV, STDDEV_POP, STDDEV_SAMP, VARIANCE, VAR_POP,
                         VAR_SAMP, COUNT_STAR, COUNT_DISTINCT) //
                 .build();
@@ -127,6 +127,16 @@ public class MySQLSqlDialect extends AbstractSqlDialect {
                     .message("Unable to create MySQL remote metadata reader. Caused by: {{cause}}")
                     .unquotedParameter("cause", exception.getMessage()).toString(), exception);
         }
+    }
+
+    /**
+     * Get all {@link ScalarFunctionCapability}s that are not explicitly excluded by {@link #DISABLED_SCALAR_FUNCTION}.
+     *
+     * @return list enabled scalar function capabilities
+     */
+    private static ScalarFunctionCapability[] getEnabledScalarFunctionCapabilities() {
+        return Arrays.stream(ScalarFunctionCapability.values())
+                .filter(Predicate.not(DISABLED_SCALAR_FUNCTION::contains)).toArray(ScalarFunctionCapability[]::new);
     }
 
     @Override
