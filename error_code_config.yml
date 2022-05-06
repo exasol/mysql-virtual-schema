@@ -2,4 +2,4 @@ error-tags:
   VS-MYSQL:
     packages:
       - com.exasol.adapter.dialects.mysql
-    highest-index: 1
+    highest-index: 56
