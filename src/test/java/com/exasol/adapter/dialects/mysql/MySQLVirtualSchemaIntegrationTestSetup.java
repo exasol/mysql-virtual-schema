@@ -89,7 +89,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
             bucket.uploadFile(JDBC_DRIVER_PATH, "drivers/jdbc/" + JDBC_DRIVER_NAME);
         } catch (final BucketAccessException | FileNotFoundException exception) {
             throw new IllegalStateException(
-                    ExaError.messageBuilder("F-VS-MYSQL-2")
+                    ExaError.messageBuilder("F-VSMYSQL-2")
                             .message("An error occurred while uploading the jdbc driver to the bucket.")
                             .mitigation("Make sure the {{JDBC_DRIVER_PATH}} file exists.")
                             .parameter("JDBC_DRIVER_PATH", JDBC_DRIVER_PATH)
