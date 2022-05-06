@@ -132,7 +132,7 @@ class MySQLSqlDialectTest {
         when(this.connectionFactoryMock.getConnection()).thenThrow(new SQLException());
         final RemoteMetadataReaderException exception = assertThrows(RemoteMetadataReaderException.class,
                 this.dialect::createRemoteMetadataReader);
-        assertThat(exception.getMessage(), containsString("E-VS-MYSQL-1"));
+        assertThat(exception.getMessage(), containsString("E-VSMYSQL-1"));
     }
 
     @Test

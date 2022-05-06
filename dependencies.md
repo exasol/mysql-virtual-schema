@@ -45,7 +45,7 @@
 | [Apache Maven Dependency Plugin][53]                    | [Apache License, Version 2.0][32]              |
 | [Lombok Maven Plugin][55]                               | [The MIT License][1]                           |
 | [Maven Failsafe Plugin][57]                             | [Apache License, Version 2.0][32]              |
-| [JaCoCo :: Maven Plugin][27]                            | [Eclipse Public License 2.0][28]               |
+| [JaCoCo :: Maven Plugin][59]                            | [Eclipse Public License 2.0][28]               |
 | [error-code-crawler-maven-plugin][61]                   | [MIT][1]                                       |
 | [Maven Clean Plugin][63]                                | [The Apache Software License, Version 2.0][36] |
 | [Maven Resources Plugin][65]                            | [The Apache Software License, Version 2.0][36] |
@@ -73,6 +73,7 @@
 [28]: https://www.eclipse.org/legal/epl-2.0/
 [30]: http://www.gnu.org/licenses/lgpl.txt
 [12]: https://github.com/exasol/exasol-testcontainers
+[59]: https://www.jacoco.org/jacoco/trunk/doc/maven.html
 [11]: https://github.com/mockito/mockito/blob/main/LICENSE
 [3]: https://projectlombok.org/LICENSE
 [21]: https://github.com/exasol/hamcrest-resultset-matcher
