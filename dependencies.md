@@ -59,6 +59,7 @@
 [1]: https://opensource.org/licenses/MIT
 [8]: https://github.com/mockito/mockito
 [53]: https://maven.apache.org/surefire/maven-failsafe-plugin/
+[33]: https://www.mojohaus.org/flatten-maven-plugin/
 [21]: https://github.com/exasol/virtual-schema-shared-integration-tests
 [35]: https://github.com/exasol/project-keeper/
 [43]: http://www.mojohaus.org/versions-maven-plugin/
@@ -80,13 +81,12 @@
 [30]: https://www.apache.org/licenses/LICENSE-2.0.txt
 [31]: https://maven.apache.org/enforcer/maven-enforcer-plugin/
 [16]: http://dev.mysql.com/doc/connector-j/en/
+[23]: https://github.com/exasol/udf-debugging-java/
 [7]: https://www.eclipse.org/legal/epl-v20.html
 [63]: http://maven.apache.org/plugins/maven-install-plugin/
 [6]: https://junit.org/junit5/
 [37]: https://sonatype.github.io/ossindex-maven/maven-plugin/
 [12]: https://testcontainers.org
-[33]: https://www.mojohaus.org/flatten-maven-plugin/flatten-maven-plugin
-[23]: https://github.com/exasol/udf-debugging-java
 [4]: http://hamcrest.org/JavaHamcrest/
 [65]: http://maven.apache.org/plugins/maven-deploy-plugin/
 [67]: http://maven.apache.org/plugins/maven-site-plugin/
