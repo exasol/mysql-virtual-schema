@@ -1,8 +1,10 @@
 # Virtual Schema for MySQL 3.0.1, released 2022-??-??
 
-Code name:
+Code name: Dependency Updates
 
 ## Summary
+
+In this release we updated dependencies and by that fixed the following security vulnerabilities: `CVE-2022-24823`, `CVE-2016-5003`, `CVE-2016-5002`, `CVE-2021-22569`, `CVE-2021-43797`, `CVE-2022-21363`, `sonatype-2012-0050`, `CVE-2016-5004`, `CVE-2021-37136`, `CVE-2021-37137`, `sonatype-2021-0789`.
 
 ## Dependency Updates
 

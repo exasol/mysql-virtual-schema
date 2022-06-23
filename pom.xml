@@ -160,7 +160,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <finalName>virtual-schema-dist-${vscjdbc.version}-mysql-${version}</finalName>
+                    <finalName>virtual-schema-dist-${vscjdbc.version}-mysql-${project.version}</finalName>
                 </configuration>
             </plugin>
             <plugin>
