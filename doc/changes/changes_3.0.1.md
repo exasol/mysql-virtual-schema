@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 3.0.1, released 2022-??-??
+# Virtual Schema for MySQL 3.0.1, released 2022-06-24
 
 Code name: Dependency Updates
 
@@ -11,7 +11,7 @@ In this release we updated dependencies and by that fixed the following security
 ### Compile Dependency Updates
 
 * Removed `com.exasol:error-reporting-java:0.4.0`
-* Updated `com.exasol:virtual-schema-common-jdbc:9.0.3` to `9.0.4`
+* Updated `com.exasol:virtual-schema-common-jdbc:9.0.3` to `9.0.5`
 
 ### Test Dependency Updates
 
@@ -19,7 +19,7 @@ In this release we updated dependencies and by that fixed the following security
 * Updated `com.exasol:hamcrest-resultset-matcher:1.4.1` to `1.5.1`
 * Updated `com.exasol:test-db-builder-java:3.2.1` to `3.3.2`
 * Added `com.exasol:udf-debugging-java:0.6.2`
-* Updated `com.exasol:virtual-schema-common-jdbc:9.0.3` to `9.0.4`
+* Updated `com.exasol:virtual-schema-common-jdbc:9.0.3` to `9.0.5`
 * Added `com.exasol:virtual-schema-shared-integration-tests:2.2.0`
 * Updated `mysql:mysql-connector-java:8.0.26` to `8.0.29`
 * Added `org.jacoco:org.jacoco.agent:0.8.8`
