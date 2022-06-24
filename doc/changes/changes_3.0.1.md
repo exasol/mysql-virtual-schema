@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 3.0.1, released 2022-06-24
+# Virtual Schema for MySQL 3.0.1, released 2022-06-27
 
 Code name: Dependency Updates
 
