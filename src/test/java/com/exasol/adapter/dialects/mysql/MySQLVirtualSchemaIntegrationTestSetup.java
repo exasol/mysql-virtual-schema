@@ -62,7 +62,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
             this.mySqlConnection = this.mySqlContainer.createConnection("");
             this.mySqlStatement = this.mySqlConnection.createStatement();
             final UdfTestSetup udfTestSetup = new UdfTestSetup(getTestHostIpFromInsideExasol(),
-                    this.exasolContainer.getDefaultBucket());
+                    this.exasolContainer.getDefaultBucket(), this.exasolConection);
             this.exasolFactory = new ExasolObjectFactory(this.exasolContainer.createConnection(""),
                     ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
             final ExasolSchema exasolSchema = this.exasolFactory.createSchema(SCHEMA_EXASOL);
@@ -101,7 +101,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     private static void uploadVsJarToBucket(final Bucket bucket) {
         try {
             bucket.uploadFile(PATH_TO_VIRTUAL_SCHEMAS_JAR, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
-        } catch (FileNotFoundException | BucketAccessException | TimeoutException exception) {
+        } catch (final FileNotFoundException | BucketAccessException | TimeoutException exception) {
             throw new IllegalStateException("Failed to upload jar to bucket " + bucket, exception);
         }
     }
@@ -111,14 +111,14 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
                 "You can use one of the following statements to connect to the test-database using dbeaver:");
         LOGGER.log(Level.INFO,
                 "dbeaver-ce --connect \"driver=mysql|database={0}|name=MySqlFromTest|openConsole=true|user={1}|password={2}|host={3}|port={4}\"",
-                new Object[] { mySqlContainer.getDatabaseName(), mySqlContainer.getUsername(),
-                        mySqlContainer.getPassword(), mySqlContainer.getHost(),
-                        String.valueOf(mySqlContainer.getMappedPort(MYSQL_PORT)) });
+                new Object[] { this.mySqlContainer.getDatabaseName(), this.mySqlContainer.getUsername(),
+                        this.mySqlContainer.getPassword(), this.mySqlContainer.getHost(),
+                        String.valueOf(this.mySqlContainer.getMappedPort(MYSQL_PORT)) });
         LOGGER.log(Level.INFO,
                 "dbeaver-ce --connect \"driver=exasol|name=ExasolFromTest|openConsole=true|user={0}|password={1}|host={2}|port={3}\"",
-                new Object[] { exasolContainer.getUsername(), exasolContainer.getPassword(), exasolContainer.getHost(),
-                        String.valueOf(
-                                exasolContainer.getMappedPort(exasolContainer.getDefaultInternalDatabasePort())) });
+                new Object[] { this.exasolContainer.getUsername(), this.exasolContainer.getPassword(),
+                        this.exasolContainer.getHost(), String.valueOf(this.exasolContainer
+                                .getMappedPort(this.exasolContainer.getDefaultInternalDatabasePort())) });
     }
 
     private AdapterScript createAdapterScript(final ExasolSchema schema) {
@@ -144,7 +144,8 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
         return this.exasolContainer;
     }
 
-    public VirtualSchema createVirtualSchema(final Map<String, String> additionalProperties, String forMySqlSchema) {
+    public VirtualSchema createVirtualSchema(final Map<String, String> additionalProperties,
+            final String forMySqlSchema) {
         final Map<String, String> properties = new HashMap<>(Map.of("CATALOG_NAME", forMySqlSchema));
         properties.putAll(additionalProperties);
         return this.exasolFactory.createVirtualSchemaBuilder("MYSQL_VIRTUAL_SCHEMA_" + (this.virtualSchemaCounter++))
