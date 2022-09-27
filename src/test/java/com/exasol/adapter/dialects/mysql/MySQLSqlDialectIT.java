@@ -1,7 +1,6 @@
 package com.exasol.adapter.dialects.mysql;
 
 import static com.exasol.adapter.dialects.mysql.IntegrationTestConstants.*;
-import static com.exasol.dbbuilder.dialects.exasol.AdapterScript.Language.JAVA;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -19,7 +18,7 @@ import org.junit.jupiter.api.*;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.dbbuilder.dialects.*;
-import com.exasol.dbbuilder.dialects.exasol.*;
+import com.exasol.dbbuilder.dialects.exasol.VirtualSchema;
 import com.exasol.dbbuilder.dialects.mysql.MySqlSchema;
 import com.exasol.matcher.TypeMatchMode;
 
@@ -58,9 +57,9 @@ class MySQLSqlDialectIT {
 
     @AfterEach
     void afterEach() {
-        dropAll(this.virtualSchema, sourceSchema);
+        dropAll(this.virtualSchema, this.sourceSchema);
         this.virtualSchema = null;
-        sourceSchema = null;
+        this.sourceSchema = null;
     }
 
     private static void dropAll(final DatabaseObject... databaseObjects) {
@@ -146,11 +145,16 @@ class MySQLSqlDialectIT {
         table.insert(null, null, "aaaaa", "a", "blob", "text", null, null, null, null, null, null, null, null);
     }
 
-    private static AdapterScript createAdapterScript(final String driverName, final ExasolSchema schema) {
-        final String content = "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
-                + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
-                + "%jar /buckets/bfsdefault/default/drivers/jdbc/" + driverName + ";\n";
-        return schema.createAdapterScript(ADAPTER_SCRIPT_EXASOL, JAVA, content);
+    @Test
+    void testDatatypes() throws SQLException {
+        // SELECT TO_TIMESTAMP('1999-12-31 23:59:00') TO_TIMESTAMP;
+        // TO_DSINTERVAL('3 10:59:59.123')
+        // select * from values(TO_DSINTERVAL('3 10:59:59.123'), TO_TIMESTAMP('1999-12-31 23:59:00'), false);
+//        final String query = "select * from values(TO_DSINTERVAL('3 10:59:59.123'), TO_TIMESTAMP('1999-12-31 23:59:00'), false)";
+        createSourceTable(List.of("TIMESTAMP_COL"), List.of("TIMESTAMP"), new Object[][] { { "2021-02-16 11:48:01" } });
+        this.virtualSchema = SETUP.createVirtualSchema(Collections.emptyMap(), MYSQL_SOURCE_SCHEMA);
+        final String query = "SELECT * FROM " + this.virtualSchema.getName() + "." + MYSQL_SOURCE_TABLE;
+        final ResultSet actualResultSet = getActualResultSet(query);
     }
 
     @Test
@@ -334,8 +338,8 @@ class MySQLSqlDialectIT {
     }
 
     private void createSourceTable(final List<String> columnNames, final List<String> types, final Object[][] values) {
-        sourceSchema = SETUP.getMySqlObjectFactory().createSchema(MYSQL_SOURCE_SCHEMA);
-        final Table table = sourceSchema.createTable(MYSQL_SOURCE_TABLE, columnNames, types);
+        this.sourceSchema = SETUP.getMySqlObjectFactory().createSchema(MYSQL_SOURCE_SCHEMA);
+        final Table table = this.sourceSchema.createTable(MYSQL_SOURCE_TABLE, columnNames, types);
         for (final Object[] value : values) {
             table.insert(value);
         }
@@ -348,7 +352,7 @@ class MySQLSqlDialectIT {
     @Test
     void testRightShiftScalarFunction() {
         createSourceTable(List.of("INT_COL_1", "INT_COL_2"), List.of("INT", "INT"), new Object[][] { { 10, 3 } });
-        virtualSchema = SETUP.createVirtualSchema(Collections.emptyMap(), MYSQL_SOURCE_SCHEMA);
+        this.virtualSchema = SETUP.createVirtualSchema(Collections.emptyMap(), MYSQL_SOURCE_SCHEMA);
         final String query = "SELECT BIT_RSHIFT(INT_COL_1, INT_COL_2) FROM " + this.virtualSchema.getName() + "."
                 + MYSQL_SOURCE_TABLE;
         assertVsQuery(query, table().row(1).matches(TypeMatchMode.NO_JAVA_TYPE_CHECK));
