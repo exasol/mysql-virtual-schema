@@ -198,8 +198,8 @@ class MySQLSqlDialectIT {
                 + "\"int_col\" <= 60, \"int_col\" > 60, \"int_col\" >= 60 FROM " + virtualSchemaJdbc + "."
                 + MYSQL_SIMPLE_TABLE + " WHERE \"int_col\" = 0";
         final ResultSet expected = getExpectedResultSet(
-                List.of("int_col DECIMAL(10,0)", "b1 DECIMAL(19,0)", "b2 DECIMAL(19,0)", "b3 DECIMAL(19,0)",
-                        "b4 DECIMAL(19,0)", "b5 DECIMAL(19,0)", "b6 DECIMAL(19,0)"), //
+                List.of("int_col DECIMAL(10,0)", "b1 BOOLEAN", "b2 BOOLEAN", "b3 BOOLEAN", "b4 BOOLEAN", "b5 BOOLEAN",
+                        "b6 BOOLEAN"), //
                 List.of("0, 0, 1, 1, 1, 0, 0"));
         assertThat(getActualResultSet(query), matchesResultSet(expected));
     }
@@ -259,9 +259,9 @@ class MySQLSqlDialectIT {
     void testAvgMinMaxAggregateFunction() throws SQLException {
         final String query = "SELECT AVG(\"int_col\"), MIN(\"int_col\"), MAX(\"int_col\") FROM " + virtualSchemaJdbc
                 + "." + MYSQL_SIMPLE_TABLE;
-        final ResultSet expected = getExpectedResultSet(
-                List.of("a DECIMAL(14,4)", "b DECIMAL(10,0)", "c DECIMAL(10,0)"), //
-                List.of("9.8333, -100.0000, 100.0000"));
+        final ResultSet expected = getExpectedResultSet( //
+                List.of("a DOUBLE", "b DECIMAL(10,0)", "c DECIMAL(10,0)"), //
+                List.of("9.833300000000001, -100.0000, 100.0000"));
         assertThat(getActualResultSet(query), matchesResultSet(expected));
     }
 
@@ -283,7 +283,7 @@ class MySQLSqlDialectIT {
     void testRewrittenDivAndModFunctions() throws SQLException {
         final String query = "SELECT DIV(\"int_col\",\"int_col\"), mod(\"int_col\",\"int_col\") FROM "
                 + virtualSchemaJdbc + "." + MYSQL_SIMPLE_TABLE;
-        final ResultSet expected = getExpectedResultSet(List.of("a DECIMAL(19,0)", "b DECIMAL(19,0)"), //
+        final ResultSet expected = getExpectedResultSet(List.of("a DECIMAL(10,0)", "b DECIMAL(10,0)"), //
                 List.of("1, 0", //
                         "1, 0", //
                         "null, null", //

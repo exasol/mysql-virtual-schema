@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 3.0.1, released 2022-09-28
+# Virtual Schema for MySQL 4.0.0, released 2022-09-28
 
 Code name: Fix vulnerabilities in dependencies
 

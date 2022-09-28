@@ -7,8 +7,7 @@ import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -150,12 +149,20 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
 
     public VirtualSchema createVirtualSchema(final Map<String, String> additionalProperties,
             final String forMySqlSchema) {
-        final Map<String, String> properties = new HashMap<>(
-                Map.of("CATALOG_NAME", forMySqlSchema, "DEBUG_ADDRESS", "172.17.0.1:3000", "LOG_LEVEL", "ALL"));
+        final Map<String, String> properties = new HashMap<>(Map.of("CATALOG_NAME", forMySqlSchema));
         properties.putAll(additionalProperties);
         return this.exasolFactory.createVirtualSchemaBuilder("MYSQL_VIRTUAL_SCHEMA_" + (this.virtualSchemaCounter++))
                 .adapterScript(this.adapterScript).connectionDefinition(this.connectionDefinition)
                 .properties(properties).build();
+    }
+
+    Map<String, String> debugProperties() {
+        final String debugAddress = System.getProperty("com.exasol.virtualschema.debug.address");
+        if (debugAddress == null) {
+            return Collections.emptyMap();
+        }
+        final String logLevel = System.getProperty("com.exasol.virtualschema.debug.level");
+        return Map.of("DEBUG_ADDRESS", debugAddress, "LOG_LEVEL", (logLevel != null ? logLevel : "ALL"));
     }
 
     @Override
