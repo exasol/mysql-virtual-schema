@@ -146,18 +146,6 @@ class MySQLSqlDialectIT {
     }
 
     @Test
-    void testDatatypes() throws SQLException {
-        // SELECT TO_TIMESTAMP('1999-12-31 23:59:00') TO_TIMESTAMP;
-        // TO_DSINTERVAL('3 10:59:59.123')
-        // select * from values(TO_DSINTERVAL('3 10:59:59.123'), TO_TIMESTAMP('1999-12-31 23:59:00'), false);
-//        final String query = "select * from values(TO_DSINTERVAL('3 10:59:59.123'), TO_TIMESTAMP('1999-12-31 23:59:00'), false)";
-        createSourceTable(List.of("TIMESTAMP_COL"), List.of("TIMESTAMP"), new Object[][] { { "2021-02-16 11:48:01" } });
-        this.virtualSchema = SETUP.createVirtualSchema(Collections.emptyMap(), MYSQL_SOURCE_SCHEMA);
-        final String query = "SELECT * FROM " + this.virtualSchema.getName() + "." + MYSQL_SOURCE_TABLE;
-        final ResultSet actualResultSet = getActualResultSet(query);
-    }
-
-    @Test
     void testSelectAll() throws SQLException {
         final String query = "SELECT * FROM " + virtualSchemaJdbc + "." + MYSQL_SIMPLE_TABLE;
         final ResultSet actualResultSet = getActualResultSet(query);
