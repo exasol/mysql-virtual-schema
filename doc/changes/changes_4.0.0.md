@@ -6,6 +6,8 @@ Code name: Fix vulnerabilities in dependencies
 
 This release fixes CVE-2022-38751 and CVE-2022-38752 in snakeyaml.
 
+Update of `virtual-schema-common-jdbc` to version [10.0.1](https://github.com/exasol/virtual-schema-common-jdbc/releases/tag/10.0.1) also provides enhanced data type detection for result sets.
+
 ## Bug Fixes
 
 * #21: Fixed vulnerabilities in dependencies.
