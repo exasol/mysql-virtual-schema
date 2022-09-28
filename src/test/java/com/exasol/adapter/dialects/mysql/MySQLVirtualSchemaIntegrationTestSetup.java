@@ -34,7 +34,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     private static final Logger LOGGER = Logger.getLogger(MySQLVirtualSchemaIntegrationTestSetup.class.getName());
     private static final String JDBC_DRIVER_NAME = "mysql-connector-java.jar";
     private static final Path JDBC_DRIVER_PATH = Path.of("target", "mysql-driver", JDBC_DRIVER_NAME);
-    private static final boolean USE_JACOCO = false;
+    private static final boolean USE_JACOCO = true;
     private final Statement mySqlStatement;
     private final MySQLContainer<?> mySqlContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE_REFERENCE)
             .withUsername("root").withPassword("");
