@@ -1,12 +1,22 @@
-# Virtual Schema for MySQL 4.0.0, released 2022-09-28
+# Virtual Schema for MySQL 4.0.0, released 2022-09-30
 
-Code name: Fix vulnerabilities in dependencies
+Code name: Enhanced Data Type Detection for Result Sets and Fixed Vulnerabilities in Dependencies
 
 ## Summary
 
-This release fixes CVE-2022-38751 and CVE-2022-38752 in snakeyaml.
+Starting with version 7.1.14 Exasol database uses the capabilities reported by each virtual schema to provide select list data types for each push down request. Based on this information the JDBC virtual schemas no longer need to infer the data types of the result set by inspecting its values. Instead the JDBC virtual schemas can now use the information provided by the database.
 
-Update of `virtual-schema-common-jdbc` to version [10.0.1](https://github.com/exasol/virtual-schema-common-jdbc/releases/tag/10.0.1) also provides enhanced data type detection for result sets.
+This release provides enhanced data type detection for result sets by updating `virtual-schema-common-jdbc` to version [10.0.1](https://github.com/exasol/virtual-schema-common-jdbc/releases/tag/10.0.1).
+
+The following table shows the changed return type for some operations:
+
+| Operation | Return type up to version 3.0.0 | Return type for version 4.0.0  |
+|-----------|---------------------------------|--------------------------------|
+| Comparison, e.g. `x < 60` | `DECIMAL`| `BOOLEAN` |
+| `AVG(DECIMAL)`            | `DECIMAL`| `DOUBLE`  |
+| `DIV(DECIMAL)`            | `DECIMAL(19,0)`| `DECIMAL(10,0)`, i.e. `BIGINT` |
+
+Additionally this release fixes vulnerabilities CVE-2022-38751 and CVE-2022-38752 reported for transitive dependency snakeyaml required by
 
 ## Bug Fixes
 
