@@ -16,7 +16,7 @@ The following table shows the changed return type for some operations:
 | `AVG(DECIMAL)`            | `DECIMAL`| `DOUBLE`  |
 | `DIV(DECIMAL)`            | `DECIMAL(19,0)`| `DECIMAL(10,0)`, i.e. `BIGINT` |
 
-Additionally this release fixes vulnerabilities CVE-2022-38751 and CVE-2022-38752 reported for transitive dependency snakeyaml required by
+Additionally this release fixes vulnerability CVE-2022-38751 reported for transitive dependency snakeyaml required by virtual-schema-shared-integration-tests.
 
 ## Bug Fixes
 
