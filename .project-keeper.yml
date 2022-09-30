@@ -5,5 +5,3 @@ sources:
       - integration_tests
       - udf_coverage
       - jar_artifact
-excludes:
-  - "E-PK-CORE-18: Outdated content: '.github/workflows/ci-build.yml'"

@@ -1,7 +1,6 @@
 package com.exasol.adapter.dialects.mysql;
 
 import static com.exasol.adapter.dialects.mysql.IntegrationTestConstants.*;
-import static com.exasol.dbbuilder.dialects.exasol.AdapterScript.Language.JAVA;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -19,7 +18,7 @@ import org.junit.jupiter.api.*;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.dbbuilder.dialects.*;
-import com.exasol.dbbuilder.dialects.exasol.*;
+import com.exasol.dbbuilder.dialects.exasol.VirtualSchema;
 import com.exasol.dbbuilder.dialects.mysql.MySqlSchema;
 import com.exasol.matcher.TypeMatchMode;
 
@@ -58,9 +57,9 @@ class MySQLSqlDialectIT {
 
     @AfterEach
     void afterEach() {
-        dropAll(this.virtualSchema, sourceSchema);
+        dropAll(this.virtualSchema, this.sourceSchema);
         this.virtualSchema = null;
-        sourceSchema = null;
+        this.sourceSchema = null;
     }
 
     private static void dropAll(final DatabaseObject... databaseObjects) {
@@ -146,13 +145,6 @@ class MySQLSqlDialectIT {
         table.insert(null, null, "aaaaa", "a", "blob", "text", null, null, null, null, null, null, null, null);
     }
 
-    private static AdapterScript createAdapterScript(final String driverName, final ExasolSchema schema) {
-        final String content = "%scriptclass com.exasol.adapter.RequestDispatcher;\n" //
-                + "%jar /buckets/bfsdefault/default/" + VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION + ";\n" //
-                + "%jar /buckets/bfsdefault/default/drivers/jdbc/" + driverName + ";\n";
-        return schema.createAdapterScript(ADAPTER_SCRIPT_EXASOL, JAVA, content);
-    }
-
     @Test
     void testSelectAll() throws SQLException {
         final String query = "SELECT * FROM " + virtualSchemaJdbc + "." + MYSQL_SIMPLE_TABLE;
@@ -194,8 +186,8 @@ class MySQLSqlDialectIT {
                 + "\"int_col\" <= 60, \"int_col\" > 60, \"int_col\" >= 60 FROM " + virtualSchemaJdbc + "."
                 + MYSQL_SIMPLE_TABLE + " WHERE \"int_col\" = 0";
         final ResultSet expected = getExpectedResultSet(
-                List.of("int_col DECIMAL(10,0)", "b1 DECIMAL(19,0)", "b2 DECIMAL(19,0)", "b3 DECIMAL(19,0)",
-                        "b4 DECIMAL(19,0)", "b5 DECIMAL(19,0)", "b6 DECIMAL(19,0)"), //
+                List.of("int_col DECIMAL(10,0)", "b1 BOOLEAN", "b2 BOOLEAN", "b3 BOOLEAN", "b4 BOOLEAN", "b5 BOOLEAN",
+                        "b6 BOOLEAN"), //
                 List.of("0, 0, 1, 1, 1, 0, 0"));
         assertThat(getActualResultSet(query), matchesResultSet(expected));
     }
@@ -255,9 +247,9 @@ class MySQLSqlDialectIT {
     void testAvgMinMaxAggregateFunction() throws SQLException {
         final String query = "SELECT AVG(\"int_col\"), MIN(\"int_col\"), MAX(\"int_col\") FROM " + virtualSchemaJdbc
                 + "." + MYSQL_SIMPLE_TABLE;
-        final ResultSet expected = getExpectedResultSet(
-                List.of("a DECIMAL(14,4)", "b DECIMAL(10,0)", "c DECIMAL(10,0)"), //
-                List.of("9.8333, -100.0000, 100.0000"));
+        final ResultSet expected = getExpectedResultSet( //
+                List.of("a DOUBLE", "b DECIMAL(10,0)", "c DECIMAL(10,0)"), //
+                List.of("9.833300000000001, -100.0000, 100.0000"));
         assertThat(getActualResultSet(query), matchesResultSet(expected));
     }
 
@@ -279,7 +271,7 @@ class MySQLSqlDialectIT {
     void testRewrittenDivAndModFunctions() throws SQLException {
         final String query = "SELECT DIV(\"int_col\",\"int_col\"), mod(\"int_col\",\"int_col\") FROM "
                 + virtualSchemaJdbc + "." + MYSQL_SIMPLE_TABLE;
-        final ResultSet expected = getExpectedResultSet(List.of("a DECIMAL(19,0)", "b DECIMAL(19,0)"), //
+        final ResultSet expected = getExpectedResultSet(List.of("a DECIMAL(10,0)", "b DECIMAL(10,0)"), //
                 List.of("1, 0", //
                         "1, 0", //
                         "null, null", //
@@ -334,8 +326,8 @@ class MySQLSqlDialectIT {
     }
 
     private void createSourceTable(final List<String> columnNames, final List<String> types, final Object[][] values) {
-        sourceSchema = SETUP.getMySqlObjectFactory().createSchema(MYSQL_SOURCE_SCHEMA);
-        final Table table = sourceSchema.createTable(MYSQL_SOURCE_TABLE, columnNames, types);
+        this.sourceSchema = SETUP.getMySqlObjectFactory().createSchema(MYSQL_SOURCE_SCHEMA);
+        final Table table = this.sourceSchema.createTable(MYSQL_SOURCE_TABLE, columnNames, types);
         for (final Object[] value : values) {
             table.insert(value);
         }
@@ -348,7 +340,7 @@ class MySQLSqlDialectIT {
     @Test
     void testRightShiftScalarFunction() {
         createSourceTable(List.of("INT_COL_1", "INT_COL_2"), List.of("INT", "INT"), new Object[][] { { 10, 3 } });
-        virtualSchema = SETUP.createVirtualSchema(Collections.emptyMap(), MYSQL_SOURCE_SCHEMA);
+        this.virtualSchema = SETUP.createVirtualSchema(Collections.emptyMap(), MYSQL_SOURCE_SCHEMA);
         final String query = "SELECT BIT_RSHIFT(INT_COL_1, INT_COL_2) FROM " + this.virtualSchema.getName() + "."
                 + MYSQL_SOURCE_TABLE;
         assertVsQuery(query, table().row(1).matches(TypeMatchMode.NO_JAVA_TYPE_CHECK));

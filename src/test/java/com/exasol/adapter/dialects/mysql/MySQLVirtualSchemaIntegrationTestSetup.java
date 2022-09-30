@@ -7,8 +7,7 @@ import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +34,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     private static final Logger LOGGER = Logger.getLogger(MySQLVirtualSchemaIntegrationTestSetup.class.getName());
     private static final String JDBC_DRIVER_NAME = "mysql-connector-java.jar";
     private static final Path JDBC_DRIVER_PATH = Path.of("target", "mysql-driver", JDBC_DRIVER_NAME);
+    private static final boolean USE_JACOCO = true;
     private final Statement mySqlStatement;
     private final MySQLContainer<?> mySqlContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE_REFERENCE)
             .withUsername("root").withPassword("");
@@ -61,10 +61,13 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
             this.exasolStatement = this.exasolConection.createStatement();
             this.mySqlConnection = this.mySqlContainer.createConnection("");
             this.mySqlStatement = this.mySqlConnection.createStatement();
-            final UdfTestSetup udfTestSetup = new UdfTestSetup(getTestHostIpFromInsideExasol(),
-                    this.exasolContainer.getDefaultBucket(), this.exasolConection);
-            this.exasolFactory = new ExasolObjectFactory(this.exasolContainer.createConnection(""),
-                    ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
+            final ExasolObjectConfiguration.Builder builder = ExasolObjectConfiguration.builder();
+            if (USE_JACOCO) {
+                final UdfTestSetup udfTestSetup = new UdfTestSetup(getTestHostIpFromInsideExasol(),
+                        this.exasolContainer.getDefaultBucket(), this.exasolConection);
+                builder.withJvmOptions(udfTestSetup.getJvmOptions());
+            }
+            this.exasolFactory = new ExasolObjectFactory(this.exasolContainer.createConnection(""), builder.build());
             final ExasolSchema exasolSchema = this.exasolFactory.createSchema(SCHEMA_EXASOL);
             this.mySqlObjectFactory = new MySqlObjectFactory(this.mySqlConnection);
             this.adapterScript = createAdapterScript(exasolSchema);
@@ -151,6 +154,15 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
         return this.exasolFactory.createVirtualSchemaBuilder("MYSQL_VIRTUAL_SCHEMA_" + (this.virtualSchemaCounter++))
                 .adapterScript(this.adapterScript).connectionDefinition(this.connectionDefinition)
                 .properties(properties).build();
+    }
+
+    Map<String, String> debugProperties() {
+        final String debugAddress = System.getProperty("com.exasol.virtualschema.debug.address");
+        if (debugAddress == null) {
+            return Collections.emptyMap();
+        }
+        final String logLevel = System.getProperty("com.exasol.virtualschema.debug.level");
+        return Map.of("DEBUG_ADDRESS", debugAddress, "LOG_LEVEL", (logLevel != null ? logLevel : "ALL"));
     }
 
     @Override
