@@ -5,7 +5,6 @@ import static com.exasol.dbbuilder.dialects.exasol.AdapterScript.Language.JAVA;
 
 import java.io.Closeable;
 import java.io.FileNotFoundException;
-import java.nio.file.Path;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
@@ -32,8 +31,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     private static final String SCHEMA_EXASOL = "SCHEMA_EXASOL";
     private static final String ADAPTER_SCRIPT_EXASOL = "ADAPTER_SCRIPT_EXASOL";
     private static final Logger LOGGER = Logger.getLogger(MySQLVirtualSchemaIntegrationTestSetup.class.getName());
-    private static final String JDBC_DRIVER_NAME = "mysql-connector-j.jar";
-    private static final Path JDBC_DRIVER_PATH = Path.of("target", "mysql-driver", JDBC_DRIVER_NAME);
+
     private static final boolean USE_JACOCO = true;
     private final Statement mySqlStatement;
     private final MySQLContainer<?> mySqlContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE_REFERENCE)
@@ -87,8 +85,8 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     private static void uploadDriverToBucket(final Bucket bucket)
             throws InterruptedException, TimeoutException, BucketAccessException {
         try {
-            final Path pathToSettingsFile = Path.of("src", "test", "resources", JDBC_DRIVER_CONFIGURATION_FILE_NAME);
-            bucket.uploadFile(pathToSettingsFile, "drivers/jdbc/" + JDBC_DRIVER_CONFIGURATION_FILE_NAME);
+            bucket.uploadStringContent(JDBC_DRIVER_CONFIGURATION_FILE_CONTENT,
+                    "drivers/jdbc/" + JDBC_DRIVER_CONFIGURATION_FILE_NAME);
             bucket.uploadFile(JDBC_DRIVER_PATH, "drivers/jdbc/" + JDBC_DRIVER_NAME);
         } catch (final BucketAccessException | FileNotFoundException exception) {
             throw new IllegalStateException(

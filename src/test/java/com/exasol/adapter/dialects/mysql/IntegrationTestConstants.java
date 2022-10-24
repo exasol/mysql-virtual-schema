@@ -12,7 +12,17 @@ public final class IntegrationTestConstants {
     public static final String TABLE_JOIN_1 = "TABLE_JOIN_1";
     public static final String TABLE_JOIN_2 = "TABLE_JOIN_2";
     public static final String DOCKER_IP_ADDRESS = "172.17.0.1";
+
+    public static final String JDBC_DRIVER_NAME = "mysql-connector-j.jar";
+    public static final Path JDBC_DRIVER_PATH = Path.of("target", "mysql-driver", JDBC_DRIVER_NAME);
     public static final String JDBC_DRIVER_CONFIGURATION_FILE_NAME = "settings.cfg";
+    public static final String JDBC_DRIVER_CONFIGURATION_FILE_CONTENT = "DRIVERNAME=MYSQL\n" //
+            + "JAR=" + JDBC_DRIVER_NAME + "\n" //
+            + "DRIVERMAIN=com.mysql.jdbc.Driver\n" //
+            + "PREFIX=jdbc:mysql:\n" //
+            + "NOSECURITY=YES\n" //
+            + "FETCHSIZE=100000\n" //
+            + "INSERTSIZE=-1\n";
 
     private IntegrationTestConstants() {
         // intentionally left empty
