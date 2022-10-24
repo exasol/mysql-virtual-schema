@@ -25,7 +25,8 @@ Updated dependencies to fix vulnerabilities.
 * Updated `com.exasol:virtual-schema-common-jdbc:9.0.5` to `10.0.1`
 * Updated `com.exasol:virtual-schema-shared-integration-tests:2.2.0` to `2.2.2`
 * Added `com.google.protobuf:protobuf-java:3.21.8`
-* Updated `mysql:mysql-connector-java:8.0.29` to `8.0.31`
+* Added `com.mysql:mysql-connector-j:8.0.31`
+* Removed `mysql:mysql-connector-java:8.0.29`
 * Updated `org.junit.jupiter:junit-jupiter:5.8.2` to `5.9.1`
 * Updated `org.mockito:mockito-junit-jupiter:4.6.1` to `4.8.1`
 * Updated `org.testcontainers:junit-jupiter:1.17.2` to `1.17.5`
