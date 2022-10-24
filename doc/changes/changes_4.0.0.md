@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 4.0.0, released 2022-09-30
+# Virtual Schema for MySQL 4.0.0, released 2022-10-25
 
 Code name: Enhanced Data Type Detection for Result Sets and Fixed Vulnerabilities in Dependencies
 
@@ -21,6 +21,7 @@ Additionally this release fixes vulnerability CVE-2022-38751 reported for transi
 ## Bug Fixes
 
 * #21: Fixed vulnerabilities in dependencies.
+* #23: Fixed CVE-2022-3171 reported for `com.google.protobuf:protobuf-java` by updating  `com.mysql:mysql-connector-j`.
 
 ## Dependency Updates
 
