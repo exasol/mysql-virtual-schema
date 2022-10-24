@@ -94,6 +94,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- override transitive dependency of mysql-connector-java to fix vulnerability CVE-2022-38752 -->
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.21.8</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
             <version>3.4.0</version>
