@@ -64,7 +64,7 @@
 [9]: https://github.com/exasol/exasol-testcontainers/blob/main/LICENSE
 [10]: https://testcontainers.org
 [11]: http://opensource.org/licenses/MIT
-[12]: https://developers.google.com/protocol-buffers/protobuf-java/
+[12]: https://developers.google.com/protocol-buffers
 [13]: https://opensource.org/licenses/BSD-3-Clause
 [14]: https://github.com/exasol/test-db-builder-java/
 [15]: https://github.com/exasol/test-db-builder-java/blob/main/LICENSE

@@ -5,3 +5,5 @@ sources:
       - integration_tests
       - udf_coverage
       - jar_artifact
+linkReplacements:
+  - https://developers.google.com/protocol-buffers/protobuf-java/|https://developers.google.com/protocol-buffers
