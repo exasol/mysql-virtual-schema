@@ -4,9 +4,11 @@ Code name: Dependency Updates
 
 ## Summary
 
+Updated dependencies to fix vulnerabilities.
+
 ## Bug Fixes
 
-* #23: Fixed CVE-2022-3171 reported for `com.google.protobuf:protobuf-java` by updating  `com.mysql:mysql-connector-j`.
+* #23: Fixed CVE-2022-3171 reported for `com.google.protobuf:protobuf-java` by updating `com.mysql:mysql-connector-j`.
 
 ## Dependency Updates
 
