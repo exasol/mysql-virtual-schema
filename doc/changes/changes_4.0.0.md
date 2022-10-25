@@ -21,7 +21,7 @@ Additionally this release fixes vulnerability CVE-2022-38751 reported for transi
 ## Bug Fixes
 
 * #21: Fixed vulnerabilities in dependencies.
-* #23: Fixed CVE-2022-3171 reported for `com.google.protobuf:protobuf-java` by updating  `com.mysql:mysql-connector-j`.
+* #23: Fixed CVE-2022-3171 reported for `com.google.protobuf:protobuf-java` by updating `com.mysql:mysql-connector-j`.
 
 ## Dependency Updates
 
