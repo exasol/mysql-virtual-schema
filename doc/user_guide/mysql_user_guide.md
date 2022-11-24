@@ -46,7 +46,7 @@ Then create a schema to hold the adapter script.
 CREATE SCHEMA SCHEMA_FOR_VS_SCRIPT;
 ```
 
-The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and database driver.
+The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and JDBC database driver (`mysql-connector-java-<version>.jar`).
 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL AS
