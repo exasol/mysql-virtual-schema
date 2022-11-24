@@ -19,12 +19,13 @@ Now register the driver in EXAOperation:
 
 You need to specify the following settings when adding the JDBC driver via EXAOperation.
 
-| Parameter   | Value                                 |
-|-------------|---------------------------------------|
-| Driver Name | `MYSQL`                               |
-| Main Class  | `com.mysql.jdbc.Driver`               |
-| Prefix      | `jdbc:mysql:`                         |
-| Files       | `mysql-connector-java-<version>.jar`  |
+| Parameter        | Value                                                                                     |
+|------------------|-------------------------------------------------------------------------------------------|
+| Driver Name      | `MYSQL`                                                                                   |
+| Main Class       | `com.mysql.jdbc.Driver`                                                                   |
+| Prefix           | `jdbc:mysql:`                                                                             |
+| Files            | `mysql-connector-j-<versions>.jar` (older versions: `mysql-connector-java-<version>.jar`) |
+| Port (optional)  | default 3306                                                                              |
 
 IMPORTANT: Currently you have to **Disable Security Manager** for the driver if you want to connect to MySQL using Virtual Schemas.
 It is necessary because JDBC driver requires a JAVA permission which we do not grant by default.  
@@ -46,13 +47,13 @@ Then create a schema to hold the adapter script.
 CREATE SCHEMA SCHEMA_FOR_VS_SCRIPT;
 ```
 
-The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and JDBC database driver (`mysql-connector-java-<version>.jar`).
+The SQL statement below creates the adapter script, defines the Java class that serves as entry point and tells the UDF framework where to find the libraries (JAR files) for Virtual Schema and JDBC database driver.
 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
     %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-10.0.1-mysql-4.0.1.jar;
-    %jar /buckets/<BFS service>/<bucket>/mysql-connector-java-<version>.jar;
+    %jar /buckets/<BFS service>/<bucket>/mysql-connector-j-<version>.jar;
 /
 ;
 ```
@@ -82,37 +83,37 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
 
 ## Data Types Conversion
 
-MySQL Data Type    | Supported | Converted Exasol Data Type| Known limitations
--------------------|-----------|---------------------------|-------------------
-BOOLEAN            |  ✓        | BOOLEAN                   | 
-BIGINT             |  ✓        | DECIMAL                   | 
-BINARY             |  ×        |                           | 
-BIT                |  ✓        | BOOLEAN                   | 
-BLOB               |  ×        |                           | 
-CHAR               |  ✓        | CHAR                      | 
-DATE               |  ✓        | DATE                      | 
-DATETIME           |  ✓        | TIMESTAMP                 | 
-DECIMAL            |  ✓        | DECIMAL                   |  
-DOUBLE             |  ✓        | DOUBLE PRECISION          | 
-ENUM               |  ✓        | CHAR                      | 
-FLOAT              |  ✓        | DOUBLE PRECISION          |  
-INT                |  ✓        | DECIMAL                   | 
-LONGBLOB           |  ×        |                           | 
-LONGTEXT           |  ✓        | VARCHAR(2000000)          | 
-MEDIUMBLOB         |  ×        |                           | 
-MEDIUMINT          |  ✓        | DECIMAL                   | 
-MEDIUMTEXT         |  ✓        | VARCHAR(2000000)          | 
-SET                |  ✓        | CHAR                      | 
-SMALLINT           |  ✓        | DECIMAL                   | 
-TEXT               |  ✓        | VARCHAR(65535)            | The size of the column is always 65535.*
-TINYBLOB           |  ×        |                           | 
-TINYINT            |  ✓        | DECIMAL                   | 
-TINYTEXT           |  ✓        | VARCHAR                   | 
-TIME               |  ✓        | TIMESTAMP                 | Casted to `TIMESTAMP` with a format `1970-01-01 hh:mm:ss`.  
-TIMESTAMP          |  ✓        | TIMESTAMP                 | 
-VARBINARY          |  ×        |                           | 
-VARCHAR            |  ✓        | VARCHAR                   | 
-YEAR               |  ✓        | DATE                      |
+| MySQL Data Type | Supported | Converted Exasol Data Type| Known limitations                                          |
+|-----------------|-----------|---------------------------|------------------------------------------------------------|
+| BOOLEAN         |  ✓        | BOOLEAN                   |                                                            |
+| BIGINT          |  ✓        | DECIMAL                   |                                                            |
+| BINARY          |  ×        |                           |                                                            |
+| BIT             |  ✓        | BOOLEAN                   |                                                            |
+| BLOB            |  ×        |                           |                                                            |
+| CHAR            |  ✓        | CHAR                      |                                                            |
+| DATE            |  ✓        | DATE                      |                                                            |
+| DATETIME        |  ✓        | TIMESTAMP                 |                                                            |
+| DECIMAL         |  ✓        | DECIMAL                   |                                                            | 
+| DOUBLE          |  ✓        | DOUBLE PRECISION          |                                                            |
+| ENUM            |  ✓        | CHAR                      |                                                            |
+| FLOAT           |  ✓        | DOUBLE PRECISION          |                                                            | 
+| INT             |  ✓        | DECIMAL                   |                                                            |
+| LONGBLOB        |  ×        |                           |                                                            |
+| LONGTEXT        |  ✓        | VARCHAR(2000000)          |                                                            |
+| MEDIUMBLOB      |  ×        |                           |                                                            |
+| MEDIUMINT       |  ✓        | DECIMAL                   |                                                            |
+| MEDIUMTEXT      |  ✓        | VARCHAR(2000000)          |                                                            |
+| SET             |  ✓        | CHAR                      |                                                            |
+| SMALLINT        |  ✓        | DECIMAL                   |                                                            |
+| TEXT            |  ✓        | VARCHAR(65535)            | The size of the column is always 65535.*                   |
+| TINYBLOB        |  ×        |                           |                                                            |
+| TINYINT         |  ✓        | DECIMAL                   |                                                            |
+| TINYTEXT        |  ✓        | VARCHAR                   |                                                            |
+| TIME            |  ✓        | TIMESTAMP                 | Casted to `TIMESTAMP` with a format `1970-01-01 hh:mm:ss`. |
+| TIMESTAMP       |  ✓        | TIMESTAMP                 |                                                            |
+| VARBINARY       |  ×        |                           |                                                            |
+| VARCHAR         |  ✓        | VARCHAR                   |                                                            |
+| YEAR            |  ✓        | DATE                      |                                                            |
 
 * The tested versions of MySQL Connector JDBC Driver return the column's size depending on the charset and its collation. 
 As the real data in a MySQL table can sometimes exceed the size that we get from the JDBC driver, we set the size for all TEXT columns to 65535 characters.  
