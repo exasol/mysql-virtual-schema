@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 4.0.1, released 2022-11-24
+# Virtual Schema for MySQL 4.0.1, released 2022-11-25
 
 Code name: Improved documentation
 
