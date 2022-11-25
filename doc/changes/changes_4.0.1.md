@@ -6,6 +6,10 @@ Code name: Improved documentation
 
 In release 4.0.1 we improved the installation instructions in the user guide, removed an old file that was left over from when the VS used Lombok and updated dependencies to fix vulnerabilities.
 
+## Known Issues
+
+There is a known issue with non-UTF databases MySQL that can lead to a type conversion error in the `IMPORT` triggered by the Virtual Schema. Currently, it looks like this is caused by an inconsistency in the behavior of the MySQL JDBC driver when getting metadata from tables and resultsets. Please follow [#26](https://github.com/exasol/mysql-virtual-schema/issues/26) for details.
+
 ## Bugfixes
 
 * #23: Fixed CVE-2022-3171 reported for `com.google.protobuf:protobuf-java` by updating `com.mysql:mysql-connector-j`.
