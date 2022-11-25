@@ -27,7 +27,7 @@ You need to specify the following settings when adding the JDBC driver via EXAOp
 | Files       | `mysql-connector-java-<version>.jar`  |
 
 IMPORTANT: Currently you have to **Disable Security Manager** for the driver if you want to connect to MySQL using Virtual Schemas.
-It is necessary because JDBC driver requires a JAVA permission which we do not grant by default.  
+It is necessary because JDBC driver requires a JAVA permission which we do not grant by default.
 
 ## Uploading the JDBC Driver to BucketFS
 
@@ -51,7 +51,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 ```sql
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-10.0.1-mysql-4.0.1.jar;
+    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-10.0.1-mysql-4.1.0.jar;
     %jar /buckets/<BFS service>/<bucket>/mysql-connector-java-<version>.jar;
 /
 ;
@@ -80,42 +80,55 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
     CATALOG_NAME = '<database name>';
 ```
 
+### Optional Parameters
+
+For virtual-schema-common-jdbc there are two ways to infer the datatypes of the columns in the result set:
+* based on the data types of the values in the result set
+* calculated by Exasol database based on metadata of the connection
+
+The second option has been implemented in VSMYSQL version 4.0.0 and requires at least Exasol 7.1.14 or Exasol 8.6.0.
+
+If parameter `IMPORT_DATA_TYPES` is not specified or with value `'EXASOL_CALCULATED'` then VSMYSQL will use the second option if possible.
+
+If you want to use the first option even with newer versions of VSMYSQL and Exasol database then please add optional parameter `IMPORT_DATA_TYPES = 'FROM_RESULT_SET'`.
+
+
 ## Data Types Conversion
 
 MySQL Data Type    | Supported | Converted Exasol Data Type| Known limitations
 -------------------|-----------|---------------------------|-------------------
-BOOLEAN            |  ✓        | BOOLEAN                   | 
-BIGINT             |  ✓        | DECIMAL                   | 
-BINARY             |  ×        |                           | 
-BIT                |  ✓        | BOOLEAN                   | 
-BLOB               |  ×        |                           | 
-CHAR               |  ✓        | CHAR                      | 
-DATE               |  ✓        | DATE                      | 
-DATETIME           |  ✓        | TIMESTAMP                 | 
-DECIMAL            |  ✓        | DECIMAL                   |  
-DOUBLE             |  ✓        | DOUBLE PRECISION          | 
-ENUM               |  ✓        | CHAR                      | 
-FLOAT              |  ✓        | DOUBLE PRECISION          |  
-INT                |  ✓        | DECIMAL                   | 
-LONGBLOB           |  ×        |                           | 
-LONGTEXT           |  ✓        | VARCHAR(2000000)          | 
-MEDIUMBLOB         |  ×        |                           | 
-MEDIUMINT          |  ✓        | DECIMAL                   | 
-MEDIUMTEXT         |  ✓        | VARCHAR(2000000)          | 
-SET                |  ✓        | CHAR                      | 
-SMALLINT           |  ✓        | DECIMAL                   | 
+BOOLEAN            |  ✓        | BOOLEAN                   |
+BIGINT             |  ✓        | DECIMAL                   |
+BINARY             |  ×        |                           |
+BIT                |  ✓        | BOOLEAN                   |
+BLOB               |  ×        |                           |
+CHAR               |  ✓        | CHAR                      |
+DATE               |  ✓        | DATE                      |
+DATETIME           |  ✓        | TIMESTAMP                 |
+DECIMAL            |  ✓        | DECIMAL                   |
+DOUBLE             |  ✓        | DOUBLE PRECISION          |
+ENUM               |  ✓        | CHAR                      |
+FLOAT              |  ✓        | DOUBLE PRECISION          |
+INT                |  ✓        | DECIMAL                   |
+LONGBLOB           |  ×        |                           |
+LONGTEXT           |  ✓        | VARCHAR(2000000)          |
+MEDIUMBLOB         |  ×        |                           |
+MEDIUMINT          |  ✓        | DECIMAL                   |
+MEDIUMTEXT         |  ✓        | VARCHAR(2000000)          |
+SET                |  ✓        | CHAR                      |
+SMALLINT           |  ✓        | DECIMAL                   |
 TEXT               |  ✓        | VARCHAR(65535)            | The size of the column is always 65535.*
-TINYBLOB           |  ×        |                           | 
-TINYINT            |  ✓        | DECIMAL                   | 
-TINYTEXT           |  ✓        | VARCHAR                   | 
-TIME               |  ✓        | TIMESTAMP                 | Casted to `TIMESTAMP` with a format `1970-01-01 hh:mm:ss`.  
-TIMESTAMP          |  ✓        | TIMESTAMP                 | 
-VARBINARY          |  ×        |                           | 
-VARCHAR            |  ✓        | VARCHAR                   | 
+TINYBLOB           |  ×        |                           |
+TINYINT            |  ✓        | DECIMAL                   |
+TINYTEXT           |  ✓        | VARCHAR                   |
+TIME               |  ✓        | TIMESTAMP                 | Casted to `TIMESTAMP` with a format `1970-01-01 hh:mm:ss`.
+TIMESTAMP          |  ✓        | TIMESTAMP                 |
+VARBINARY          |  ×        |                           |
+VARCHAR            |  ✓        | VARCHAR                   |
 YEAR               |  ✓        | DATE                      |
 
-* The tested versions of MySQL Connector JDBC Driver return the column's size depending on the charset and its collation. 
-As the real data in a MySQL table can sometimes exceed the size that we get from the JDBC driver, we set the size for all TEXT columns to 65535 characters.  
+* The tested versions of MySQL Connector JDBC Driver return the column's size depending on the charset and its collation.
+As the real data in a MySQL table can sometimes exceed the size that we get from the JDBC driver, we set the size for all TEXT columns to 65535 characters.
 
 If you need to use currently unsupported data types or find a way around known limitations, please, create a github issue in the [VS repository](https://github.com/exasol/virtual-schemas/issues).
 
