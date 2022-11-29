@@ -18,6 +18,7 @@ import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolService;
 import com.exasol.dbbuilder.dialects.exasol.*;
+import com.exasol.dbbuilder.dialects.mysql.MySqlImmediateDatabaseObjectWriter;
 import com.exasol.dbbuilder.dialects.mysql.MySqlObjectFactory;
 import com.exasol.errorreporting.ExaError;
 import com.exasol.udfdebugging.UdfTestSetup;
@@ -152,6 +153,10 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
         return this.exasolFactory.createVirtualSchemaBuilder("MYSQL_VIRTUAL_SCHEMA_" + (this.virtualSchemaCounter++))
                 .adapterScript(this.adapterScript).connectionDefinition(this.connectionDefinition)
                 .properties(properties).build();
+    }
+
+    public MySqlImmediateDatabaseObjectWriter getTableWriterWithCharacterSet(final String characterSet) {
+        return new TableWriterWithCharacterSet(this.mySqlConnection, characterSet);
     }
 
     Map<String, String> debugProperties() {

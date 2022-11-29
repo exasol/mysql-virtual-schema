@@ -7,8 +7,8 @@
     <description>Virtual Schema for MySQL</description>
     <url>https://github.com/exasol/mysql-virtual-schema/</url>
     <properties>
-        <vscjdbc.version>10.0.1</vscjdbc.version>
-        <org.testcontainers.version>1.17.5</org.testcontainers.version>
+        <vscjdbc.version>10.1.0</vscjdbc.version>
+        <org.testcontainers.version>1.17.6</org.testcontainers.version>
     </properties>
     <repositories>
         <repository>
@@ -55,14 +55,14 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>4.8.1</version>
+            <version>4.9.0</version>
             <scope>test</scope>
         </dependency>
         <!--Integration test dependencies -->
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-testcontainers</artifactId>
-            <version>6.2.0</version>
+            <version>6.3.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -87,13 +87,13 @@
             <!-- override transitive dependency of mysql-connector-java to fix vulnerability CVE-2022-38752 -->
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.21.8</version>
+            <version>3.21.9</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>test-db-builder-java</artifactId>
-            <version>3.4.0</version>
+            <version>3.4.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -111,7 +111,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>udf-debugging-java</artifactId>
-            <version>0.6.4</version>
+            <version>0.6.5</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
