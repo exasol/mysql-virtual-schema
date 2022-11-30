@@ -17,7 +17,7 @@ import org.junit.Assume;
 import org.junit.jupiter.api.*;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.exasol.adapter.dialects.JdbcAdapterProperties.DataTypeDetection;
+import com.exasol.adapter.dialects.DataTypeDetection;
 import com.exasol.adapter.dialects.mysql.charset.ColumnInspector;
 import com.exasol.adapter.dialects.mysql.charset.Version;
 import com.exasol.containers.ExasolDockerImageReference;
@@ -151,7 +151,7 @@ class MySQLSqlDialectIT {
     @Test
     void importDataTypesFromResultSet() throws SQLException {
         Assume.assumeTrue(runCharsetTest());
-        final String query = setupCharacterSet(DataTypeDetection.FROM_RESULT_SET);
+        final String query = setupCharacterSet(DataTypeDetection.Strategy.FROM_RESULT_SET);
         final ResultSet actual = getActualResultSet(query);
         final ResultSet expected = getExpectedResultSet(List.of("c1 CHAR(1) UTF8", "c2 CHAR(1) UTF8"), //
                 List.of(SPECIAL_CHAR_QUOTED + ", " + SPECIAL_CHAR_QUOTED));
@@ -161,7 +161,7 @@ class MySQLSqlDialectIT {
     @Test
     void importDataTypesExasolCalculated() throws SQLException {
         Assume.assumeTrue(runCharsetTest());
-        final String query = setupCharacterSet(DataTypeDetection.EXASOL_CALCULATED);
+        final String query = setupCharacterSet(DataTypeDetection.Strategy.EXASOL_CALCULATED);
         final Exception exception = assertThrows(SQLException.class, () -> getActualResultSet(query));
         assertThat(exception.getMessage(),
                 matchesRegex("ETL-3009: .*Charset conversion from 'UTF-8' to 'ASCII' failed.*"));
@@ -182,11 +182,11 @@ class MySQLSqlDialectIT {
         return false;
     }
 
-    private String setupCharacterSet(final DataTypeDetection strategy) throws SQLException {
+    private String setupCharacterSet(final DataTypeDetection.Strategy strategy) throws SQLException {
         final String tableName = MYSQL_SOURCE_TABLE;
         createMySqlTableWithCharacterSet(MYSQL_SOURCE_SCHEMA, tableName, "latin1");
         this.virtualSchema = SETUP.createVirtualSchema( //
-                Map.of(DataTypeDetection.KEY, strategy.name()), //
+                Map.of(DataTypeDetection.STRATEGY_PROPERTY, strategy.name()), //
                 MYSQL_SOURCE_SCHEMA);
         final ColumnInspector inspector = SETUP.getColumnInspector(MYSQL_SOURCE_SCHEMA);
         inspector.describeFromMetadata(MYSQL_SOURCE_SCHEMA, MYSQL_SOURCE_TABLE);
