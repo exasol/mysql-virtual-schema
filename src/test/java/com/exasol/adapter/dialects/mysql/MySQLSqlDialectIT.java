@@ -18,6 +18,8 @@ import org.junit.jupiter.api.*;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.adapter.dialects.JdbcAdapterProperties.DataTypeDetection;
+import com.exasol.adapter.dialects.mysql.charset.ColumnInspector;
+import com.exasol.adapter.dialects.mysql.charset.Version;
 import com.exasol.containers.ExasolDockerImageReference;
 import com.exasol.dbbuilder.dialects.*;
 import com.exasol.dbbuilder.dialects.exasol.VirtualSchema;
@@ -98,7 +100,6 @@ class MySQLSqlDialectIT {
     private ResultSet getActualResultSet(final String query) throws SQLException {
         final Statement statement = SETUP.getExasolStatement();
         return statement.executeQuery(query);
-
     }
 
     private static void createMySqlSimpleTable(final Schema mySqlSchema) {
@@ -171,9 +172,8 @@ class MySQLSqlDialectIT {
         if (!dockerImage.hasMajor() || !dockerImage.hasMinor() || !dockerImage.hasFix()) {
             return false;
         }
-        final Version version = new Version(dockerImage.getMajor(), dockerImage.getMinor(),
-                dockerImage.getFixVersion());
-        if ((dockerImage.getMajor() == 7) && version.isGreaterOrEqualThan(Version.parse("8.1.14"))) {
+        final Version version = Version.of(dockerImage.getMajor(), dockerImage.getMinor(), dockerImage.getFixVersion());
+        if ((dockerImage.getMajor() == 7) && version.isGreaterOrEqualThan(Version.parse("7.1.14"))) {
             return true;
         }
         if ((dockerImage.getMajor() == 8) && version.isGreaterOrEqualThan(Version.parse("8.6.0"))) {
@@ -182,12 +182,16 @@ class MySQLSqlDialectIT {
         return false;
     }
 
-    private String setupCharacterSet(final DataTypeDetection strategy) {
+    private String setupCharacterSet(final DataTypeDetection strategy) throws SQLException {
         final String tableName = MYSQL_SOURCE_TABLE;
         createMySqlTableWithCharacterSet(MYSQL_SOURCE_SCHEMA, tableName, "latin1");
         this.virtualSchema = SETUP.createVirtualSchema( //
                 Map.of(DataTypeDetection.KEY, strategy.name()), //
                 MYSQL_SOURCE_SCHEMA);
+        final ColumnInspector inspector = SETUP.getColumnInspector(MYSQL_SOURCE_SCHEMA);
+        inspector.describeFromMetadata(MYSQL_SOURCE_SCHEMA, MYSQL_SOURCE_TABLE);
+        final String query = String.format("select * from %s.%s", MYSQL_SOURCE_SCHEMA, MYSQL_SOURCE_TABLE);
+        inspector.describeFromQuery(MYSQL_SOURCE_SCHEMA, query);
         return "SELECT * FROM " + this.virtualSchema.getName() + "." + tableName;
     }
 

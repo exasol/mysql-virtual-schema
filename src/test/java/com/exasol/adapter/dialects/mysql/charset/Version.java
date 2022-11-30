@@ -1,14 +1,14 @@
-package com.exasol.adapter.dialects.mysql;
+package com.exasol.adapter.dialects.mysql.charset;
 
 import java.util.Arrays;
 
-class Version implements Comparable<Version> {
+public class Version implements Comparable<Version> {
 
-    static Version of(final int... numbers) {
+    public static Version of(final int... numbers) {
         return new Version(numbers);
     }
 
-    static Version parse(final String string) {
+    public static Version parse(final String string) {
         final int[] numbers = Arrays.stream(string.split("\\.")).mapToInt(Integer::parseInt).toArray();
         return new Version(numbers);
     }

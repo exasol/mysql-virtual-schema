@@ -6,13 +6,16 @@ import static com.exasol.dbbuilder.dialects.exasol.AdapterScript.Language.JAVA;
 import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.sql.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.testcontainers.containers.MySQLContainer;
 
+import com.exasol.adapter.dialects.mysql.charset.ColumnInspector;
+import com.exasol.adapter.dialects.mysql.charset.TableWriterWithCharacterSet;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
@@ -159,13 +162,8 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
         return new TableWriterWithCharacterSet(this.mySqlConnection, characterSet);
     }
 
-    Map<String, String> debugProperties() {
-        final String debugAddress = System.getProperty("com.exasol.virtualschema.debug.address");
-        if (debugAddress == null) {
-            return Collections.emptyMap();
-        }
-        final String logLevel = System.getProperty("com.exasol.virtualschema.debug.level");
-        return Map.of("DEBUG_ADDRESS", debugAddress, "LOG_LEVEL", (logLevel != null ? logLevel : "ALL"));
+    public ColumnInspector getColumnInspector(final String catalogName) {
+        return ColumnInspector.from(this.mySqlConnection, catalogName);
     }
 
     @Override

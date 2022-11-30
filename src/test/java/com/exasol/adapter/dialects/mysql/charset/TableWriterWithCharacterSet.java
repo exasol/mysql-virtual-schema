@@ -1,4 +1,4 @@
-package com.exasol.adapter.dialects.mysql;
+package com.exasol.adapter.dialects.mysql.charset;
 
 import java.sql.Connection;
 
