@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 4.1.0, released 2022-??-??
+# Virtual Schema for MySQL 4.1.0, released 2022-12-02
 
 Code name: Configurable datatype detection
 
@@ -6,8 +6,9 @@ Code name: Configurable datatype detection
 
 Virtual-schema-common-jdbc version 10.0.0 introduced enhanced detection for data types of result sets.
 
-Unfortunately the new algorithm shows problems in scenarios with
-* MySQL data type `CHAR`, `VARCHAR`, or `ENUM`
+Unfortunately with the new algorithm compatibility problems with the source database can happen under the following circumstances:
+
+* data type `CHAR` or `VARCHAR`
 * 8-bit character sets with encodings like `latin1` or `ISO-8859-1`
 * characters being not strictly ASCII, e.g. German umlaut "Ü"
 

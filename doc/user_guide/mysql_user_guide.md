@@ -81,17 +81,7 @@ CREATE VIRTUAL SCHEMA <virtual schema name>
     CATALOG_NAME = '<database name>';
 ```
 
-### Optional Parameters
-
-For virtual-schema-common-jdbc there are two ways to infer the datatypes of the columns in the result set:
-* (O1) based on the data types of the values in the result set
-* (O2) calculated by Exasol database based on metadata of the connection
-
-The second option has been implemented in VSMYSQL version 4.0.0 and requires at least Exasol 7.1.14 or Exasol 8.6.0.
-
-If parameter `IMPORT_DATA_TYPES` is not specified or with value `'EXASOL_CALCULATED'` then VSMYSQL will use option (O2) if possible.
-
-If you want to use option (O1) even with newer versions of VSMYSQL and Exasol database then please add optional parameter `IMPORT_DATA_TYPES = 'FROM_RESULT_SET'`.
+See also [Adapter Properties for JDBC-Based Virtual Schemas](https://github.com/exasol/virtual-schema-common-jdbc#adapter-properties-for-jdbc-based-virtual-schemas).
 
 ## Data Types Conversion
 
