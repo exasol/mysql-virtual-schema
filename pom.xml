@@ -10,15 +10,6 @@
         <vscjdbc.version>10.1.0</vscjdbc.version>
         <org.testcontainers.version>1.17.6</org.testcontainers.version>
     </properties>
-    <repositories>
-        <repository>
-            <id>maven.exasol.com</id>
-            <url>https://maven.exasol.com/artifactory/exasol-releases</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
     <dependencies>
         <dependency>
             <groupId>com.exasol</groupId>
