@@ -4,21 +4,26 @@ import static com.exasol.adapter.dialects.mysql.IntegrationTestConstants.*;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.hamcrest.Matchers.matchesRegex;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.sql.*;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.hamcrest.Matcher;
+import org.junit.Assume;
 import org.junit.jupiter.api.*;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.exasol.adapter.dialects.DataTypeDetection;
+import com.exasol.adapter.dialects.mysql.charset.ColumnInspector;
+import com.exasol.adapter.dialects.mysql.charset.Version;
+import com.exasol.containers.ExasolDockerImageReference;
 import com.exasol.dbbuilder.dialects.*;
 import com.exasol.dbbuilder.dialects.exasol.VirtualSchema;
+import com.exasol.dbbuilder.dialects.mysql.MySQLIdentifier;
 import com.exasol.dbbuilder.dialects.mysql.MySqlSchema;
 import com.exasol.matcher.TypeMatchMode;
 
@@ -90,13 +95,11 @@ class MySQLSqlDialectIT {
                 + String.join(", ", expectedColumns) + ")");
         statement.execute("INSERT INTO " + qualifiedExpectedTableName + " VALUES" + expectedValues);
         return statement.executeQuery("SELECT * FROM " + qualifiedExpectedTableName);
-
     }
 
     private ResultSet getActualResultSet(final String query) throws SQLException {
         final Statement statement = SETUP.getExasolStatement();
         return statement.executeQuery(query);
-
     }
 
     private static void createMySqlSimpleTable(final Schema mySqlSchema) {
@@ -143,6 +146,70 @@ class MySQLSqlDialectIT {
         table.insert(null, null, "aaa", "aaaaaaaaaaaaa", "bloooooooooooob", "text3", null, null, null, null, "3", null,
                 "", "");
         table.insert(null, null, "aaaaa", "a", "blob", "text", null, null, null, null, null, null, null, null);
+    }
+
+    @Test
+    void importDataTypesFromResultSet() throws SQLException {
+        Assume.assumeTrue(runCharsetTest());
+        final String query = setupCharacterSet(DataTypeDetection.Strategy.FROM_RESULT_SET);
+        final ResultSet actual = getActualResultSet(query);
+        final ResultSet expected = getExpectedResultSet(List.of("c1 CHAR(1) UTF8", "c2 CHAR(1) UTF8"), //
+                List.of(SPECIAL_CHAR_QUOTED + ", " + SPECIAL_CHAR_QUOTED));
+        assertThat(actual, matchesResultSet(expected));
+    }
+
+    @Test
+    void importDataTypesExasolCalculated() throws SQLException {
+        Assume.assumeTrue(runCharsetTest());
+        final String query = setupCharacterSet(DataTypeDetection.Strategy.EXASOL_CALCULATED);
+        final Exception exception = assertThrows(SQLException.class, () -> getActualResultSet(query));
+        assertThat(exception.getMessage(),
+                matchesRegex("ETL-3009: .*Charset conversion from 'UTF-8' to 'ASCII' failed.*"));
+    }
+
+    private boolean runCharsetTest() {
+        final ExasolDockerImageReference dockerImage = SETUP.getExasolContainer().getDockerImageReference();
+        if (!dockerImage.hasMajor() || !dockerImage.hasMinor() || !dockerImage.hasFix()) {
+            return false;
+        }
+        final Version version = Version.of(dockerImage.getMajor(), dockerImage.getMinor(), dockerImage.getFixVersion());
+        if ((dockerImage.getMajor() == 7) && version.isGreaterOrEqualThan(Version.parse("7.1.14"))) {
+            return true;
+        }
+        if ((dockerImage.getMajor() == 8) && version.isGreaterOrEqualThan(Version.parse("8.6.0"))) {
+            return true;
+        }
+        return false;
+    }
+
+    private String setupCharacterSet(final DataTypeDetection.Strategy strategy) throws SQLException {
+        final String tableName = MYSQL_SOURCE_TABLE;
+        createMySqlTableWithCharacterSet(MYSQL_SOURCE_SCHEMA, tableName, "latin1");
+        this.virtualSchema = SETUP.createVirtualSchema( //
+                Map.of(DataTypeDetection.STRATEGY_PROPERTY, strategy.name()), //
+                MYSQL_SOURCE_SCHEMA);
+        final ColumnInspector inspector = SETUP.getColumnInspector(MYSQL_SOURCE_SCHEMA);
+        inspector.describeFromMetadata(MYSQL_SOURCE_SCHEMA, MYSQL_SOURCE_TABLE);
+        final String query = String.format("select * from %s.%s", MYSQL_SOURCE_SCHEMA, MYSQL_SOURCE_TABLE);
+        inspector.describeFromQuery(MYSQL_SOURCE_SCHEMA, query);
+        return "SELECT * FROM " + this.virtualSchema.getName() + "." + tableName;
+    }
+
+    private static final char[] GERMAN_UMLAUT = { 0xDC };
+    private static final String SPECIAL_CHAR = new String(GERMAN_UMLAUT);
+    private static final String SPECIAL_CHAR_QUOTED = "'" + SPECIAL_CHAR + "'";
+
+    private void createMySqlTableWithCharacterSet(final String schemaName, final String tableName,
+            final String characterSet) {
+        this.sourceSchema = getSchemaWithCharacterSet(schemaName, "latin1");
+        final String mySqlEnum = "ENUM('A', " + SPECIAL_CHAR_QUOTED + ")";
+        final Table table = this.sourceSchema.createTable(tableName, List.of("c1", "c2"),
+                List.of("CHAR(1)", mySqlEnum));
+        table.insert(SPECIAL_CHAR, SPECIAL_CHAR);
+    }
+
+    private static MySqlSchema getSchemaWithCharacterSet(final String schemaName, final String characterSet) {
+        return new MySqlSchema(SETUP.getTableWriterWithCharacterSet(characterSet), MySQLIdentifier.of(schemaName));
     }
 
     @Test

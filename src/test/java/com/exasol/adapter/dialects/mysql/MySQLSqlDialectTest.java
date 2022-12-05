@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.DataTypeDetection;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
@@ -139,7 +140,8 @@ class MySQLSqlDialectTest {
     void testGetSupportedProperties() {
         assertThat(this.dialect.getSupportedProperties(),
                 containsInAnyOrder(CONNECTION_NAME_PROPERTY, TABLE_FILTER_PROPERTY, CATALOG_NAME_PROPERTY,
-                        EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY));
+                        EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY,
+                        DataTypeDetection.STRATEGY_PROPERTY));
     }
 
     @Test

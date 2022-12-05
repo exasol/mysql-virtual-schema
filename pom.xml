@@ -2,23 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>mysql-virtual-schema</artifactId>
-    <version>4.0.1</version>
+    <version>4.1.0</version>
     <name>Virtual Schema for MySQL</name>
     <description>Virtual Schema for MySQL</description>
     <url>https://github.com/exasol/mysql-virtual-schema/</url>
     <properties>
-        <vscjdbc.version>10.0.1</vscjdbc.version>
+        <vscjdbc.version>10.1.0</vscjdbc.version>
         <org.testcontainers.version>1.17.6</org.testcontainers.version>
     </properties>
-    <repositories>
-        <repository>
-            <id>maven.exasol.com</id>
-            <url>https://maven.exasol.com/artifactory/exasol-releases</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
     <dependencies>
         <dependency>
             <groupId>com.exasol</groupId>
@@ -55,7 +46,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-testcontainers</artifactId>
-            <version>6.3.1</version>
+            <version>6.4.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -155,7 +146,13 @@
                     <excludeVulnerabilityIds>
                         <!-- False positive in snakeyaml. According to https://bitbucket.org/snakeyaml/snakeyaml/issues/531/stackoverflow-oss-fuzz-47081
                              this is already fixed in 1.32. -->
-                        <exclude>CVE-2022-38752</exclude>
+                        <exclude>xCVE-2022-38752</exclude>
+                        <!-- Exclude vulnerabilities found in transitive dependency
+                             to org.yaml:snakeyaml:jar:1.33
+                             required by virtual-schema-shared-integration-tests
+                             as there is no update available currently -->
+                        <exclude>CVE-2022-1471</exclude>
+                        <exclude>CVE-2022-40150</exclude>
                     </excludeVulnerabilityIds>
                 </configuration>
             </plugin>
@@ -171,7 +168,7 @@
     <parent>
         <artifactId>mysql-virtual-schema-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>4.0.1</version>
+        <version>4.1.0</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
