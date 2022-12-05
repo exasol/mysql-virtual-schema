@@ -28,4 +28,5 @@ For details please [Adapter Properties for JDBC-Based Virtual Schemas](https://g
 
 ### Test Dependency Updates
 
+* Updated `com.exasol:exasol-testcontainers:6.3.1` to `6.4.0`
 * Updated `com.exasol:virtual-schema-common-jdbc:10.0.1` to `10.1.0`
