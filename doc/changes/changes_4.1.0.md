@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 4.1.0, released 2022-12-02
+# Virtual Schema for MySQL 4.1.0, released 2022-12-05
 
 Code name: Configurable datatype detection
 
