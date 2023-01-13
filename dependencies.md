@@ -64,7 +64,7 @@
 [9]: https://github.com/exasol/exasol-testcontainers/blob/main/LICENSE
 [10]: https://testcontainers.org
 [11]: http://opensource.org/licenses/MIT
-[12]: http://dev.mysql.com/doc/connector-j/en/
+[12]: https://dev.mysql.com/doc/connector-j/8.0/en/
 [13]: https://developers.google.com/protocol-buffers
 [14]: https://opensource.org/licenses/BSD-3-Clause
 [15]: https://github.com/exasol/test-db-builder-java/
