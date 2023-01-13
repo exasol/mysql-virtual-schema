@@ -22,7 +22,7 @@ You need to specify the following settings when adding the JDBC driver via EXAOp
 | Parameter        | Value                                                                                     |
 |------------------|-------------------------------------------------------------------------------------------|
 | Driver Name      | `MYSQL`                                                                                   |
-| Main Class       | `com.mysql.jdbc.Driver`                                                                   |
+| Main Class       | `com.mysql.cj.jdbc.Driver` (older versions `com.mysql.jdbc.Driver`)                       |
 | Prefix           | `jdbc:mysql:`                                                                             |
 | Files            | `mysql-connector-j-<versions>.jar` (older versions: `mysql-connector-java-<version>.jar`) |
 | Port (optional)  | default 3306                                                                              |
