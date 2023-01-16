@@ -5,5 +5,8 @@ sources:
       - integration_tests
       - udf_coverage
       - jar_artifact
+excludes:
+  - "E-PK-CORE-18: Outdated content: '.github/workflows/broken_links_checker.yml'"
+  - "[WARNING] W-PK-CORE-155: Could not detect latest available version of project-keeper. Server returned HTTP response code: 504 for URL: https://search.maven.org/solrsearch/select?q=g:com.exasol+AND+a:project-keeper-maven-plugin&wt=json. Please check network connection and response from 'https://search.maven.org/solrsearch/select?q=g:com.exasol+AND+a:project-keeper-maven-plugin&wt=json'"
 linkReplacements:
   - https://developers.google.com/protocol-buffers/protobuf-java/|https://developers.google.com/protocol-buffers
