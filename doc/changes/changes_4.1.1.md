@@ -10,7 +10,7 @@ Updated documentation uses default name of main class of MySQL driver, though th
 
 ### Test Dependency Updates
 
-* Updated `com.exasol:exasol-testcontainers:6.4.0` to `6.4.1`
+* Updated `com.exasol:exasol-testcontainers:6.4.0` to `6.5.0`
 * Updated `com.exasol:udf-debugging-java:0.6.5` to `0.6.6`
 * Updated `com.exasol:virtual-schema-shared-integration-tests:2.2.2` to `2.2.3`
 * Updated `com.google.protobuf:protobuf-java:3.21.9` to `3.21.12`
