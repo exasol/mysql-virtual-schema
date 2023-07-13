@@ -30,6 +30,7 @@ import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
 import com.exasol.adapter.properties.DataTypeDetection;
+import com.exasol.adapter.properties.TableCountLimit;
 
 @ExtendWith(MockitoExtension.class)
 class MySQLSqlDialectTest {
@@ -141,7 +142,7 @@ class MySQLSqlDialectTest {
         assertThat(this.dialect.getSupportedProperties(),
                 containsInAnyOrder(CONNECTION_NAME_PROPERTY, TABLE_FILTER_PROPERTY, CATALOG_NAME_PROPERTY,
                         EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY,
-                        DataTypeDetection.STRATEGY_PROPERTY));
+                        DataTypeDetection.STRATEGY_PROPERTY, TableCountLimit.MAXTABLES_PROPERTY));
     }
 
     @Test
