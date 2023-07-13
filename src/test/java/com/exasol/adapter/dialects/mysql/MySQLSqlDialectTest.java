@@ -26,10 +26,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.DataTypeDetection;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
+import com.exasol.adapter.properties.DataTypeDetection;
 
 @ExtendWith(MockitoExtension.class)
 class MySQLSqlDialectTest {
