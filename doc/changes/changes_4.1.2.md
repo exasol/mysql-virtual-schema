@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 4.1.2, released 2023-07-13
+# Virtual Schema for MySQL 4.1.2, released 2023-07-14
 
 Code name: Dependency Upgrade on top of 4.1.1
 
