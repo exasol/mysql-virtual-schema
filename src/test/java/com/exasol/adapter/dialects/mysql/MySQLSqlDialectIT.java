@@ -17,9 +17,9 @@ import org.junit.Assume;
 import org.junit.jupiter.api.*;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.exasol.adapter.dialects.DataTypeDetection;
 import com.exasol.adapter.dialects.mysql.charset.ColumnInspector;
 import com.exasol.adapter.dialects.mysql.charset.Version;
+import com.exasol.adapter.properties.DataTypeDetection;
 import com.exasol.containers.ExasolDockerImageReference;
 import com.exasol.dbbuilder.dialects.*;
 import com.exasol.dbbuilder.dialects.exasol.VirtualSchema;
