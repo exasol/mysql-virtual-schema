@@ -53,11 +53,16 @@ The SQL statement below creates the adapter script, defines the Java class that 
 --/
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/<BFS service>/<bucket>/virtual-schema-dist-11.0.1-mysql-4.1.2.jar;
-    %jar /buckets/<BFS service>/<bucket>/mysql-connector-java-<version>.jar;
+    %jar /buckets/bfsdefault/default/virtual-schema-dist-11.0.1-mysql-4.1.2.jar;
+    %jar /buckets/bfsdefault/default/mysql-connector-java-<version>.jar;
 /
 ;
 ```
+
+Please note
+* The example uses BucketFS service `bfsdefault` and bucket name `default`.
+  * If your installation is configured differently or you did create a different bucket then please replace the substring `/bfsdefault/default/` accordingly.
+* If you notice any issue with your SQL client not identifying where a script ends or truncating scripts, see the [SQL Client Troubleshooting section](https://docs.exasol.com/db/latest/database_concepts/virtual_schema/user_guide.htm#SQL_Client_Troubleshooting) for solutions.
 
 ## Defining a Named Connection
 
@@ -96,10 +101,10 @@ See also [Adapter Properties for JDBC-Based Virtual Schemas](https://github.com/
 | CHAR            |  ✓        | CHAR                      |                                                            |
 | DATE            |  ✓        | DATE                      |                                                            |
 | DATETIME        |  ✓        | TIMESTAMP                 |                                                            |
-| DECIMAL         |  ✓        | DECIMAL                   |                                                            | 
+| DECIMAL         |  ✓        | DECIMAL                   |                                                            |
 | DOUBLE          |  ✓        | DOUBLE PRECISION          |                                                            |
 | ENUM            |  ✓        | CHAR                      |                                                            |
-| FLOAT           |  ✓        | DOUBLE PRECISION          |                                                            | 
+| FLOAT           |  ✓        | DOUBLE PRECISION          |                                                            |
 | INT             |  ✓        | DECIMAL                   |                                                            |
 | LONGBLOB        |  ×        |                           |                                                            |
 | LONGTEXT        |  ✓        | VARCHAR(2000000)          |                                                            |
