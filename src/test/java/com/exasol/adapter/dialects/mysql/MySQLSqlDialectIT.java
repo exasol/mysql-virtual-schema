@@ -55,27 +55,6 @@ class MySQLSqlDialectIT {
         virtualSchemaJdbc = SETUP.createVirtualSchema(Collections.emptyMap(), mySqlSchema.getName()).getName();
     }
 
-    private String f(final String label, final Object value) {
-        return String.format("%s: '%s'", label, value);
-    }
-
-    @Test
-    void experiment() throws SQLException {
-        final Statement statement = SETUP.getMySqlStatement();
-        final ResultSet resultSet = statement.executeQuery("select NULL");
-        final ResultSetMetaData metadata = resultSet.getMetaData();
-        final int col = 1;
-        final String properties = String.join(", ", List.of( //
-                f("Type", metadata.getColumnType(col)), //
-                f("TypeName", metadata.getColumnTypeName(col)), //
-                f("Name", metadata.getColumnName(col)), //
-                f("Label", metadata.getColumnLabel(col)), //
-                f("ClassName", metadata.getColumnClassName(col)) //
-        ));
-        System.out.println(String.format("Found %d columns, column %d: %s.", //
-                metadata.getColumnCount(), col, properties));
-    }
-
     @AfterAll
     static void afterAll() throws IOException {
         SETUP.close();
