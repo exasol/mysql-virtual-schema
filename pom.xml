@@ -98,6 +98,12 @@
             <version>0.6.10</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>2.0.6</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -145,12 +151,12 @@
                 <configuration>
                     <excludeVulnerabilityIds>
                         <!-- False positive in snakeyaml. According to https://bitbucket.org/snakeyaml/snakeyaml/issues/531/stackoverflow-oss-fuzz-47081
-							 this is already fixed in 1.32. -->
+                             this is already fixed in 1.32. -->
                         <exclude>xCVE-2022-38752</exclude>
                         <!-- Exclude vulnerabilities found in transitive dependency
-							 to org.yaml:snakeyaml:jar:1.33
-							 required by virtual-schema-shared-integration-tests
-							 as there is no update available currently -->
+                             to org.yaml:snakeyaml:jar:1.33
+                             required by virtual-schema-shared-integration-tests
+                             as there is no update available currently -->
                         <exclude>CVE-2022-1471</exclude>
                         <exclude>CVE-2022-40150</exclude>
                     </excludeVulnerabilityIds>
