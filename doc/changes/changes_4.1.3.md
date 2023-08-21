@@ -17,6 +17,7 @@ This releases improves documentation by considering SQL clients other than DbVis
 * Updated `com.google.protobuf:protobuf-java:3.23.4` to `3.24.0`
 * Updated `com.mysql:mysql-connector-j:8.0.33` to `8.1.0`
 * Updated `org.junit.jupiter:junit-jupiter:5.9.3` to `5.10.0`
+* Added `org.slf4j:slf4j-jdk14:2.0.6`
 
 ### Plugin Dependency Updates
 
