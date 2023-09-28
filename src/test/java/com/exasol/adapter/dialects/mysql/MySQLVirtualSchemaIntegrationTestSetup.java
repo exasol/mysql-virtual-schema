@@ -79,7 +79,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
                     connectionString, this.mySqlContainer.getUsername(), this.mySqlContainer.getPassword());
             logConnectionInfo();
         } catch (final SQLException | BucketAccessException | TimeoutException exception) {
-            throw new IllegalStateException("Failed to created MySQL test setup.", exception);
+            throw new IllegalStateException("Failed to create MySQL test setup.", exception);
         } catch (final InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Thread was interrupted");
