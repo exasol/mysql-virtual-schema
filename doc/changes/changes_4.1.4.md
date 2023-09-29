@@ -10,6 +10,10 @@ This release fixes CVE-2023-42503 in test dependency `org.apache.commons:commons
 
 * #42: Fixed CVE-2023-42503 in test dependency `org.apache.commons:commons-compress`
 
+## Documentation
+
+* #40: Update User Guide on Registering the JDBC Driver
+
 ## Dependency Updates
 
 ### Compile Dependency Updates
