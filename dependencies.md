@@ -24,7 +24,7 @@
 | [Matcher for SQL Result Sets][17]               | [MIT License][18]                                                      |
 | [virtual-schema-shared-integration-tests][19]   | [MIT License][20]                                                      |
 | [udf-debugging-java][21]                        | [MIT License][22]                                                      |
-| [SLF4J JDK14 Binding][23]                       | [MIT License][24]                                                      |
+| [SLF4J JDK14 Provider][23]                      | [MIT License][24]                                                      |
 | [JaCoCo :: Agent][25]                           | [Eclipse Public License 2.0][26]                                       |
 
 ## Plugin Dependencies
@@ -64,7 +64,7 @@
 [7]: https://github.com/mockito/mockito/blob/main/LICENSE
 [8]: https://github.com/exasol/exasol-testcontainers/
 [9]: https://github.com/exasol/exasol-testcontainers/blob/main/LICENSE
-[10]: https://testcontainers.org
+[10]: https://java.testcontainers.org
 [11]: http://opensource.org/licenses/MIT
 [12]: http://dev.mysql.com/doc/connector-j/en/
 [13]: https://developers.google.com/protocol-buffers
