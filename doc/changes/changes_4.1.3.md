@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 4.1.4, released 2023-09-29
+# Virtual Schema for MySQL 4.1.3, released 2023-09-29
 
 Code name: Fix CVE-2023-42503 in test dependency
 
