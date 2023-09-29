@@ -2,40 +2,30 @@
 
 [MySQL](https://www.mysql.com/) is an open-source relational database management system.
 
-## Registering the JDBC Driver in EXAOperation
+## Uploading the JDBC Driver to Exasol BucketFS
 
-First download the [MySQL JDBC driver](https://dev.mysql.com/downloads/connector/j/).
-Select Operating System -> Platform Independent -> Download.
+1. Download the [MySQL JDBC driver](https://dev.mysql.com/downloads/connector/j/). Select Operating System -> Platform Independent -> Download.
+2. Upload the driver to BucketFS, see the [BucketFS documentation](https://docs.exasol.com/db/latest/administration/on-premise/bucketfs/accessfiles.htm) for details.
 
-Now register the driver in EXAOperation:
+    Hint: Put the driver into folder `default/drivers/jdbc/` to register it for [ExaLoader](#registering-the-jdbc-driver-for-exaloader), too.
 
-1. Click "Software"
-1. Switch to tab "JDBC Drivers"
-1. Click "Browse..."
-1. Select JDBC driver file
-1. Click "Upload"
-1. Click "Add"
-1. In a dialog "Add EXACluster JDBC driver" configure the JDBC driver (see below)
+## Registering the JDBC driver for ExaLoader
 
-You need to specify the following settings when adding the JDBC driver via EXAOperation.
+In order to enable the ExaLoader to fetch data from the external database you must register the driver for ExaLoader as described in the [Installation procedure for JDBC drivers](https://github.com/exasol/docker-db/#installing-custom-jdbc-drivers).
+1. ExaLoader expects the driver in BucketFS folder `default/drivers/jdbc`.
 
-| Parameter        | Value                                                                                     |
-|------------------|-------------------------------------------------------------------------------------------|
-| Driver Name      | `MYSQL`                                                                                   |
-| Main Class       | `com.mysql.cj.jdbc.Driver` (for versions below major version 8 it was `com.mysql.jdbc.Driver`)                       |
-| Prefix           | `jdbc:mysql:`                                                                             |
-| Files            | `mysql-connector-j-<versions>.jar` (older versions: `mysql-connector-java-<version>.jar`) |
-| Port (optional)  | default 3306                                                                              |
+    If you uploaded the driver for UDF to a different folder, then you need to [upload](#uploading-the-jdbc-driver-to-exasol-bucketfs) the driver again.
+2. Additionally you need to create file `settings.cfg` and [upload](#uploading-the-jdbc-driver-to-exasol-bucketfs) it to the same folder in BucketFS:
 
-IMPORTANT: Currently you have to **Disable Security Manager** for the driver if you want to connect to MySQL using Virtual Schemas.
-It is necessary because JDBC driver requires a JAVA permission which we do not grant by default.
-
-## Uploading the JDBC Driver to BucketFS
-
-1. [Create a bucket in BucketFS](https://docs.exasol.com/administration/on-premise/bucketfs/create_new_bucket_in_bucketfs_service.htm)
-1. Upload the driver to BucketFS
-
-This step is necessary since the UDF container the adapter runs in has no access to the JDBC drivers installed via EXAOperation but it can access BucketFS.
+```properties
+DRIVERNAME=MYSQL
+JAR=mysql-connector-j.jar
+DRIVERMAIN=com.mysql.jdbc.Driver
+PREFIX=jdbc:mysql:
+NOSECURITY=YES
+FETCHSIZE=100000
+INSERTSIZE=-1
+```
 
 ## Installing the Adapter Script
 
@@ -53,7 +43,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 --/
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/bfsdefault/default/virtual-schema-dist-11.0.1-mysql-4.1.3.jar;
+    %jar /buckets/bfsdefault/default/virtual-schema-dist-11.0.2-mysql-4.1.3.jar;
     %jar /buckets/bfsdefault/default/mysql-connector-java-<version>.jar;
 /
 ;
@@ -134,4 +124,5 @@ In the following matrix you find combinations of JDBC driver and dialect version
 
 | Virtual Schema Version | MySQL Version | Driver Name     | Driver Version |
 |------------------------|---------------|-----------------|----------------|
-| Latest                 | MySQL 8.0.23  | MySQL Connector | 8.0.23         |
+| 4.1.3                  | MySQL 8.0.23  | MySQL Connector | 8.0.23         |
+| Latest                 | MySQL 8.1.0   | MySQL Connector | 8.1.0          |
