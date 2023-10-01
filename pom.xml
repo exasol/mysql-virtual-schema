@@ -146,23 +146,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.sonatype.ossindex.maven</groupId>
-                <artifactId>ossindex-maven-plugin</artifactId>
-                <configuration>
-                    <excludeVulnerabilityIds>
-                        <!-- False positive in snakeyaml. According to https://bitbucket.org/snakeyaml/snakeyaml/issues/531/stackoverflow-oss-fuzz-47081
-                             this is already fixed in 1.32. -->
-                        <exclude>xCVE-2022-38752</exclude>
-                        <!-- Exclude vulnerabilities found in transitive dependency
-                             to org.yaml:snakeyaml:jar:1.33
-                             required by virtual-schema-shared-integration-tests
-                             as there is no update available currently -->
-                        <exclude>CVE-2022-1471</exclude>
-                        <exclude>CVE-2022-40150</exclude>
-                    </excludeVulnerabilityIds>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
