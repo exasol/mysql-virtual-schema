@@ -40,7 +40,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     private final Statement mySqlStatement;
     private final MySQLContainer<?> mySqlContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE_REFERENCE)
             .withUsername("root").withPassword("");
-    private final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>()
+    private final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>("8.23.0")
             .withRequiredServices(ExasolService.BUCKETFS, ExasolService.UDF).withReuse(true);
     private final Connection exasolConection;
     private final Statement exasolStatement;
