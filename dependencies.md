@@ -43,7 +43,7 @@
 | [Apache Maven JAR Plugin][40]                           | [Apache License, Version 2.0][30] |
 | [Artifact reference checker and unifier][41]            | [MIT License][42]                 |
 | [Apache Maven Dependency Plugin][43]                    | [Apache-2.0][30]                  |
-| [Project keeper maven plugin][44]                       | [The MIT License][45]             |
+| [Project Keeper Maven plugin][44]                       | [The MIT License][45]             |
 | [Maven Failsafe Plugin][46]                             | [Apache-2.0][30]                  |
 | [JaCoCo :: Maven Plugin][47]                            | [Eclipse Public License 2.0][26]  |
 | [error-code-crawler-maven-plugin][48]                   | [MIT License][49]                 |
