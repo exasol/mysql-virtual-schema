@@ -44,9 +44,7 @@ public class MySQLColumnMetadataReader extends BaseColumnMetadataReader {
 
     private DataType convertVarChar(final JDBCTypeDescription jdbcTypeDescription) {
         final int size = getVarcharSize(jdbcTypeDescription);
-        final int octetLength = jdbcTypeDescription.getByteSize();
-        final DataType.ExaCharset charset = (octetLength == size) ? DataType.ExaCharset.ASCII
-                : DataType.ExaCharset.UTF8;
+        final DataType.ExaCharset charset = DataType.ExaCharset.UTF8;
         if (size <= DataType.MAX_EXASOL_VARCHAR_SIZE) {
             final int precision = getVarcharPrecision(size);
             return DataType.createVarChar(precision, charset);
