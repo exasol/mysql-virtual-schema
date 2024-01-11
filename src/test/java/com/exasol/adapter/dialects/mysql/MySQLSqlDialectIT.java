@@ -157,11 +157,13 @@ class MySQLSqlDialectIT {
         @Test
         void importDataTypesFromResultSet() throws SQLException {
                 Assume.assumeTrue(runCharsetTest());
-                final String query = setupMySQLTableWithLatin1AndVirtualSchemaWithStrategy(
-                                DataTypeDetection.Strategy.FROM_RESULT_SET);
+
                 // final ResultSet actual = getActualResultSet(query);
-                final Exception exception = assertThrows(SQLDataException.class, () -> getActualResultSet(query));
-                assertThat(exception.getMessage(), containsString("E-VSCJDBC-46"));
+                final Exception exception = assertThrows(DatabaseObjectException.class, () -> {
+                        setupMySQLTableWithLatin1AndVirtualSchemaWithStrategy(
+                                        DataTypeDetection.Strategy.FROM_RESULT_SET);
+                });
+                assertThat(exception.getMessage(), containsString("E-VSCJDBC-47"));
         }
 
         @Test
