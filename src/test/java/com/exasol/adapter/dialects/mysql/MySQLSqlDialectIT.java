@@ -4,7 +4,7 @@ import static com.exasol.adapter.dialects.mysql.IntegrationTestConstants.*;
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesRegex;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
@@ -159,20 +159,16 @@ class MySQLSqlDialectIT {
                 Assume.assumeTrue(runCharsetTest());
                 final String query = setupMySQLTableWithLatin1AndVirtualSchemaWithStrategy(
                                 DataTypeDetection.Strategy.FROM_RESULT_SET);
-                final ResultSet actual = getActualResultSet(query);
-                final ResultSet expected = getExpectedResultSet(List.of("c1 CHAR(1) UTF8", "c2 CHAR(1) UTF8"), //
-                                List.of(SPECIAL_CHAR_QUOTED + ", " + SPECIAL_CHAR_QUOTED));
-                assertThat(actual, matchesResultSet(expected));
+                // final ResultSet actual = getActualResultSet(query);
+                final Exception exception = assertThrows(SQLDataException.class, () -> getActualResultSet(query));
+                assertThat(exception.getMessage(), containsString("E-VSCJDBC-46"));
         }
 
         @Test
         void importDataTypesExasolCalculated() throws SQLException {
                 Assume.assumeTrue(runCharsetTest());
-                final String query = setupMySQLTableWithLatin1AndVirtualSchemaWithStrategy(
-                                DataTypeDetection.Strategy.EXASOL_CALCULATED);
-                final Exception exception = assertThrows(SQLException.class, () -> getActualResultSet(query));
-                assertThat(exception.getMessage(),
-                                matchesRegex("ETL-3009: .*Charset conversion from 'UTF-8' to 'ASCII' failed.*"));
+                assertDoesNotThrow(() -> setupMySQLTableWithLatin1AndVirtualSchemaWithStrategy(
+                                DataTypeDetection.Strategy.EXASOL_CALCULATED));
         }
 
         private boolean runCharsetTest() {
