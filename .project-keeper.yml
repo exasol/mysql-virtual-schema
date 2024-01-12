@@ -5,7 +5,9 @@ sources:
       - integration_tests
       - udf_coverage
       - jar_artifact
-excludes:
-
+build:
+  exasolDbVersions:
+    - "7.1.25"
+    - "8.24.0"
 linkReplacements:
   - https://developers.google.com/protocol-buffers/protobuf-java/|https://developers.google.com/protocol-buffers
