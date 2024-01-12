@@ -5,7 +5,9 @@ import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesRegex;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
 import java.sql.*;
@@ -154,8 +156,50 @@ class MySQLSqlDialectIT {
                 table.insert(null, null, "aaaaa", "a", "blob", "text", null, null, null, null, null, null, null, null);
         }
 
+        static void assumeExasol8OrHigher() {
+                assumeTrue(isExasol8OrHigher(), "is Exasol version 8 or higher");
+        }
+
+        static void assumeExasol7OrLower() {
+                assumeTrue(isExasol7OrLower(), "is Exasol version 7 or lower");
+        }
+
+        static boolean isExasol8OrHigher() {
+                final ExasolDockerImageReference imageReference = SETUP.getExasolContainer().getDockerImageReference();
+                return imageReference.hasMajor() && (imageReference.getMajor() >= 8);
+        }
+
+        static boolean isExasol7OrLower() {
+                final ExasolDockerImageReference imageReference = SETUP.getExasolContainer().getDockerImageReference();
+                return imageReference.hasMajor() && (imageReference.getMajor() <= 7);
+        }
+
+        @Test
+        void importDataTypesFromResultSetV7() throws SQLException {
+                assumeExasol7OrLower();
+                Assume.assumeTrue(runCharsetTest());
+                final String query = setupMySQLTableWithLatin1AndVirtualSchemaWithStrategy(
+                                DataTypeDetection.Strategy.FROM_RESULT_SET);
+                final ResultSet actual = getActualResultSet(query);
+                final ResultSet expected = getExpectedResultSet(List.of("c1 CHAR(1) UTF8", "c2 CHAR(1) UTF8"), //
+                                List.of(SPECIAL_CHAR_QUOTED + ", " + SPECIAL_CHAR_QUOTED));
+                assertThat(actual, matchesResultSet(expected));
+        }
+
+        @Test
+        void importDataTypesExasolCalculatedV7() throws SQLException {
+                assumeExasol7OrLower();
+                Assume.assumeTrue(runCharsetTest());
+                final String query = setupMySQLTableWithLatin1AndVirtualSchemaWithStrategy(
+                                DataTypeDetection.Strategy.EXASOL_CALCULATED);
+                final Exception exception = assertThrows(SQLException.class, () -> getActualResultSet(query));
+                assertThat(exception.getMessage(),
+                                matchesRegex("ETL-3009: .*Charset conversion from 'UTF-8' to 'ASCII' failed.*"));
+        }
+
         @Test
         void importDataTypesFromResultSet() throws SQLException {
+                assumeExasol8OrHigher();
                 Assume.assumeTrue(runCharsetTest());
 
                 // final ResultSet actual = getActualResultSet(query);
@@ -168,6 +212,7 @@ class MySQLSqlDialectIT {
 
         @Test
         void importDataTypesExasolCalculated() throws SQLException {
+                assumeExasol8OrHigher();
                 Assume.assumeTrue(runCharsetTest());
                 assertDoesNotThrow(() -> setupMySQLTableWithLatin1AndVirtualSchemaWithStrategy(
                                 DataTypeDetection.Strategy.EXASOL_CALCULATED));
