@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 5.0.0, released 2024-01-15
+# Virtual Schema for MySQL 5.0.0, released 2024-01-18
 
 Code name: Char set is always `utf-8`, deprecated IMPORT_DATA_TYPES `FROM_RESULT_SET` value .
 
