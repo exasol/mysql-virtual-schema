@@ -1,6 +1,6 @@
 # Virtual Schema for MySQL 5.0.0, released 2024-01-15
 
-Code name: Changes related to Exasol V8 / importing text datatypes.
+Code name: Char set is always `utf-8`, deprecated IMPORT_DATA_TYPES `from_result_set` value .
 
 ## Summary
 

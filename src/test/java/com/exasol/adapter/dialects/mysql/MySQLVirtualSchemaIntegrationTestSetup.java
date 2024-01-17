@@ -59,7 +59,6 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
             uploadVsJarToBucket(bucket);
             this.exasolConnection = this.exasolContainer.createConnection("");
             this.exasolStatement = this.exasolConnection.createStatement();
-            // exasolStatement.execute("CONTROL SET TRACE LEVEL NOTICE WITH LOG TIMEOUT 0;");
             this.mySqlConnection = this.mySqlContainer.createConnection("");
             this.mySqlStatement = this.mySqlConnection.createStatement();
 
