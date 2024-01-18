@@ -36,13 +36,12 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     private static final String ADAPTER_SCRIPT_EXASOL = "ADAPTER_SCRIPT_EXASOL";
     private static final Logger LOGGER = Logger.getLogger(MySQLVirtualSchemaIntegrationTestSetup.class.getName());
 
-    private static final boolean USE_JACOCO = true;
     private final Statement mySqlStatement;
     private final MySQLContainer<?> mySqlContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE_REFERENCE)
             .withUsername("root").withPassword("");
-    private final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>()
+    private final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>("8.23.0")
             .withRequiredServices(ExasolService.BUCKETFS, ExasolService.UDF).withReuse(true);
-    private final Connection exasolConection;
+    private final Connection exasolConnection;
     private final Statement exasolStatement;
     private final AdapterScript adapterScript;
     private final ConnectionDefinition connectionDefinition;
@@ -58,17 +57,16 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
             final Bucket bucket = this.exasolContainer.getDefaultBucket();
             uploadDriverToBucket(bucket);
             uploadVsJarToBucket(bucket);
-            this.exasolConection = this.exasolContainer.createConnection("");
-            this.exasolStatement = this.exasolConection.createStatement();
+            this.exasolConnection = this.exasolContainer.createConnection("");
+            this.exasolStatement = this.exasolConnection.createStatement();
             this.mySqlConnection = this.mySqlContainer.createConnection("");
             this.mySqlStatement = this.mySqlConnection.createStatement();
-            final ExasolObjectConfiguration.Builder builder = ExasolObjectConfiguration.builder();
-            if (USE_JACOCO) {
-                final UdfTestSetup udfTestSetup = new UdfTestSetup(getTestHostIpFromInsideExasol(),
-                        this.exasolContainer.getDefaultBucket(), this.exasolConection);
-                builder.withJvmOptions(udfTestSetup.getJvmOptions());
-            }
-            this.exasolFactory = new ExasolObjectFactory(this.exasolContainer.createConnection(""), builder.build());
+
+            final UdfTestSetup udfTestSetup = new UdfTestSetup(getTestHostIpFromInsideExasol(),
+                    this.exasolContainer.getDefaultBucket(), this.exasolConnection);
+            this.exasolFactory = new ExasolObjectFactory(this.exasolContainer.createConnection(""),
+                    ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
+
             final ExasolSchema exasolSchema = this.exasolFactory.createSchema(SCHEMA_EXASOL);
             this.mySqlObjectFactory = new MySqlObjectFactory(this.mySqlConnection);
             this.adapterScript = createAdapterScript(exasolSchema);
@@ -169,7 +167,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     public void close() {
         try {
             this.exasolStatement.close();
-            this.exasolConection.close();
+            this.exasolConnection.close();
             this.mySqlStatement.close();
             this.mySqlConnection.close();
             this.exasolContainer.stop();

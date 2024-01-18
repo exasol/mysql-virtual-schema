@@ -77,7 +77,7 @@ public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
                     }
                     final Table table = tableBuilder.build();
                     for (final List<Object> row : tableRequest.getRows()) {
-                        List<Object> newRow = preprocessValuesForMySql(row);
+                        final List<Object> newRow = preprocessValuesForMySql(row);
                         table.insert(newRow.toArray());
                     }
                 }
@@ -87,11 +87,11 @@ public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
             };
         }
 
-        private List<Object> preprocessValuesForMySql(List<Object> row) {
-            List<Object> newRow = new ArrayList<>(row.size());
-            for (Object col : row) {
+        private List<Object> preprocessValuesForMySql(final List<Object> row) {
+            final List<Object> newRow = new ArrayList<>(row.size());
+            for (final Object col : row) {
                 if (col instanceof Timestamp) {
-                    Timestamp timestamp = (Timestamp) col;
+                    final Timestamp timestamp = (Timestamp) col;
                     final String formatted = timestamp.toInstant().atOffset(ZoneOffset.UTC)
                             .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                     newRow.add(formatted);
