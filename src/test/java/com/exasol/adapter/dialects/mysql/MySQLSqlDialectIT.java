@@ -183,7 +183,6 @@ class MySQLSqlDialectIT {
     private String setupMySQLTableWithLatin1AndVirtualSchemaWithStrategy(final DataTypeDetection.Strategy strategy)
             throws SQLException {
         final String tableName = MYSQL_SOURCE_TABLE;
-        // create SQL schema with latin1 characterset and virtual schema
         createMySqlTableContainingCharAndEnumWithCharacterSet(MYSQL_SOURCE_SCHEMA, tableName, "latin1");
 
         this.virtualSchema = SETUP.createVirtualSchema( //
