@@ -220,6 +220,7 @@ class MySQLSqlDialectIT {
     }
 
     private static MySqlSchema getSchemaWithCharacterSet(final String schemaName, final String characterSet) {
+        // See https://github.com/exasol/test-db-builder-java/issues/134
         return new MySqlSchema(SETUP.getTableWriterWithCharacterSet(characterSet), MySQLIdentifier.of(schemaName));
     }
 
