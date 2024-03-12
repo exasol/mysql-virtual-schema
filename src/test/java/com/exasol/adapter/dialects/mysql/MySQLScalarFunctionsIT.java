@@ -23,6 +23,14 @@ import com.exasol.dbbuilder.dialects.mysql.MySqlObjectFactory;
 public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
     private static final MySQLVirtualSchemaIntegrationTestSetup SETUP = new MySQLVirtualSchemaIntegrationTestSetup();
 
+    @Override
+    protected void beforeAllSetup() throws SQLException {
+    }
+
+    @Override
+    protected void afterAllTeardown() throws SQLException {
+    }
+
     @BeforeAll
     static void beforeAll() {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
@@ -63,13 +71,13 @@ public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
         private final MySqlObjectFactory mySqlFactory;
 
         public MySqlTestSetup() {
-            mySqlFactory = SETUP.getMySqlObjectFactory();
+            this.mySqlFactory = SETUP.getMySqlObjectFactory();
         }
 
         @Override
         public VirtualSchemaTestSetupProvider getVirtualSchemaTestSetupProvider() {
             return (final CreateVirtualSchemaTestSetupRequest request) -> {
-                final Schema mySqlSchema = mySqlFactory.createSchema(getUniqueIdentifier());
+                final Schema mySqlSchema = this.mySqlFactory.createSchema(getUniqueIdentifier());
                 for (final TableRequest tableRequest : request.getTableRequests()) {
                     final Table.Builder tableBuilder = mySqlSchema.createTableBuilder(tableRequest.getName());
                     for (final Column column : tableRequest.getColumns()) {

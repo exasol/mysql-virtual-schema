@@ -14,7 +14,7 @@
 | [Virtual Schema Common JDBC][0]                 | [MIT License][1]                                                       |
 | [Hamcrest][2]                                   | [BSD License 3][3]                                                     |
 | [JUnit Jupiter (Aggregator)][4]                 | [Eclipse Public License v2.0][5]                                       |
-| [mockito-junit-jupiter][6]                      | [The MIT License][7]                                                   |
+| [mockito-junit-jupiter][6]                      | [MIT][7]                                                               |
 | [Test containers for Exasol on Docker][8]       | [MIT License][9]                                                       |
 | [Testcontainers :: JUnit Jupiter Extension][10] | [MIT][11]                                                              |
 | [Testcontainers :: JDBC :: MySQL][10]           | [MIT][11]                                                              |
@@ -57,7 +57,7 @@
 [4]: https://junit.org/junit5/
 [5]: https://www.eclipse.org/legal/epl-v20.html
 [6]: https://github.com/mockito/mockito
-[7]: https://github.com/mockito/mockito/blob/main/LICENSE
+[7]: https://opensource.org/licenses/MIT
 [8]: https://github.com/exasol/exasol-testcontainers/
 [9]: https://github.com/exasol/exasol-testcontainers/blob/main/LICENSE
 [10]: https://java.testcontainers.org
