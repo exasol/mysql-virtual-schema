@@ -15,6 +15,7 @@
             <groupId>com.exasol</groupId>
             <artifactId>virtual-schema-common-jdbc</artifactId>
             <version>${vscjdbc.version}</version>
+            <type>jar</type>
         </dependency>
         <!--Unit test dependencies -->
         <dependency>
@@ -155,7 +156,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -163,7 +163,6 @@
                     <useModulePath>false</useModulePath>
                 </configuration>
             </plugin>
-            -->
              <plugin>
                  <groupId>org.codehaus.mojo</groupId>
                  <artifactId>versions-maven-plugin</artifactId>
