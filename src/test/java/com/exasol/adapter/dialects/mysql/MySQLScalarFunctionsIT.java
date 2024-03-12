@@ -25,12 +25,10 @@ public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
 
     @Override
     protected void beforeAllSetup() throws SQLException {
-        // TODO Auto-generated method stub
     }
 
     @Override
     protected void afterAllTeardown() throws SQLException {
-        // TODO Auto-generated method stub
     }
 
     @BeforeAll
