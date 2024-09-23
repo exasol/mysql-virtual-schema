@@ -43,7 +43,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 --/
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/bfsdefault/default/virtual-schema-dist-12.0.0-mysql-5.0.1.jar;
+    %jar /buckets/bfsdefault/default/virtual-schema-dist-12.0.0-mysql-5.0.2.jar;
     %jar /buckets/bfsdefault/default/mysql-connector-java-<version>.jar;
 /
 ;
@@ -125,4 +125,5 @@ In the following matrix you find combinations of JDBC driver and dialect version
 | Virtual Schema Version | MySQL Version | Driver Name     | Driver Version |
 |------------------------|---------------|-----------------|----------------|
 | 4.1.3                  | MySQL 8.0.23  | MySQL Connector | 8.0.23         |
-| Latest                 | MySQL 8.1.0   | MySQL Connector | 8.1.0          |
+| 5.0.1                  | MySQL 8.1.0   | MySQL Connector | 8.1.0          |
+| Latest                 | MySQL 9.0.1   | MySQL Connector | 9.0.1          |

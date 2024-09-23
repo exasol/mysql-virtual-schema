@@ -9,7 +9,7 @@ build:
   runnerOs: ubuntu-20.04
   freeDiskSpace: false
   exasolDbVersions:
-    - "7.1.25"
-    - "8.24.0"
+    - "8.31.0"
+    - "7.1.29"
 linkReplacements:
   - https://developers.google.com/protocol-buffers/protobuf-java/|https://developers.google.com/protocol-buffers
