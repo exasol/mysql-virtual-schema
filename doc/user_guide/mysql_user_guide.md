@@ -125,4 +125,5 @@ In the following matrix you find combinations of JDBC driver and dialect version
 | Virtual Schema Version | MySQL Version | Driver Name     | Driver Version |
 |------------------------|---------------|-----------------|----------------|
 | 4.1.3                  | MySQL 8.0.23  | MySQL Connector | 8.0.23         |
-| Latest                 | MySQL 8.1.0   | MySQL Connector | 8.1.0          |
+| 5.0.1                  | MySQL 8.1.0   | MySQL Connector | 8.1.0          |
+| Latest                 | MySQL 9.0.1   | MySQL Connector | 9.0.1          |
