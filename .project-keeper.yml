@@ -12,4 +12,4 @@ build:
     - "8.31.0"
     - "7.1.29"
 linkReplacements:
-  #- https://developers.google.com/protocol-buffers/protobuf-java/|https://developers.google.com/protocol-buffers
+  - https://developers.google.com/protocol-buffers/protobuf-java/|https://developers.google.com/protocol-buffers
