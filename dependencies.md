@@ -12,7 +12,7 @@
 | Dependency                                      | License                                                                |
 | ----------------------------------------------- | ---------------------------------------------------------------------- |
 | [Virtual Schema Common JDBC][0]                 | [MIT License][1]                                                       |
-| [Hamcrest][2]                                   | [BSD License 3][3]                                                     |
+| [Hamcrest][2]                                   | [BSD-3-Clause][3]                                                      |
 | [JUnit Jupiter (Aggregator)][4]                 | [Eclipse Public License v2.0][5]                                       |
 | [mockito-junit-jupiter][6]                      | [MIT][7]                                                               |
 | [Test containers for Exasol on Docker][8]       | [MIT License][9]                                                       |
@@ -25,14 +25,14 @@
 | [virtual-schema-shared-integration-tests][19]   | [MIT License][20]                                                      |
 | [udf-debugging-java][21]                        | [MIT License][22]                                                      |
 | [SLF4J JDK14 Provider][23]                      | [MIT License][24]                                                      |
-| [JaCoCo :: Agent][25]                           | [Eclipse Public License 2.0][26]                                       |
+| [JaCoCo :: Agent][25]                           | [EPL-2.0][26]                                                          |
 
 ## Plugin Dependencies
 
 | Dependency                                              | License                           |
 | ------------------------------------------------------- | --------------------------------- |
 | [SonarQube Scanner for Maven][27]                       | [GNU LGPL 3][28]                  |
-| [Apache Maven Toolchains Plugin][29]                    | [Apache License, Version 2.0][30] |
+| [Apache Maven Toolchains Plugin][29]                    | [Apache-2.0][30]                  |
 | [Apache Maven Compiler Plugin][31]                      | [Apache-2.0][30]                  |
 | [Apache Maven Enforcer Plugin][32]                      | [Apache-2.0][30]                  |
 | [Maven Flatten Plugin][33]                              | [Apache Software Licenese][30]    |
@@ -41,19 +41,19 @@
 | [Versions Maven Plugin][37]                             | [Apache License, Version 2.0][30] |
 | [duplicate-finder-maven-plugin Maven Mojo][38]          | [Apache License 2.0][39]          |
 | [Apache Maven Assembly Plugin][40]                      | [Apache-2.0][30]                  |
-| [Apache Maven JAR Plugin][41]                           | [Apache License, Version 2.0][30] |
+| [Apache Maven JAR Plugin][41]                           | [Apache-2.0][30]                  |
 | [Artifact reference checker and unifier][42]            | [MIT License][43]                 |
 | [Apache Maven Dependency Plugin][44]                    | [Apache-2.0][30]                  |
 | [Project Keeper Maven plugin][45]                       | [The MIT License][46]             |
 | [Maven Failsafe Plugin][47]                             | [Apache-2.0][30]                  |
-| [JaCoCo :: Maven Plugin][48]                            | [Eclipse Public License 2.0][26]  |
+| [JaCoCo :: Maven Plugin][48]                            | [EPL-2.0][26]                     |
 | [error-code-crawler-maven-plugin][49]                   | [MIT License][50]                 |
 | [Reproducible Build Maven Plugin][51]                   | [Apache 2.0][35]                  |
 
 [0]: https://github.com/exasol/virtual-schema-common-jdbc/
 [1]: https://github.com/exasol/virtual-schema-common-jdbc/blob/main/LICENSE
 [2]: http://hamcrest.org/JavaHamcrest/
-[3]: http://opensource.org/licenses/BSD-3-Clause
+[3]: https://raw.githubusercontent.com/hamcrest/JavaHamcrest/master/LICENSE
 [4]: https://junit.org/junit5/
 [5]: https://www.eclipse.org/legal/epl-v20.html
 [6]: https://github.com/mockito/mockito
