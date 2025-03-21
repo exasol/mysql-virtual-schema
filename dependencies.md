@@ -24,7 +24,7 @@
 | [Matcher for SQL Result Sets][17]               | [MIT License][18]                                                      |
 | [virtual-schema-shared-integration-tests][19]   | [MIT License][20]                                                      |
 | [udf-debugging-java][21]                        | [MIT License][22]                                                      |
-| [SLF4J JDK14 Provider][23]                      | [MIT License][24]                                                      |
+| [SLF4J JDK14 Provider][23]                      | [MIT][24]                                                              |
 | [JaCoCo :: Agent][25]                           | [EPL-2.0][26]                                                          |
 
 ## Plugin Dependencies
@@ -74,7 +74,7 @@
 [21]: https://github.com/exasol/udf-debugging-java/
 [22]: https://github.com/exasol/udf-debugging-java/blob/main/LICENSE
 [23]: http://www.slf4j.org
-[24]: http://www.opensource.org/licenses/mit-license.php
+[24]: https://opensource.org/license/mit
 [25]: https://www.eclemma.org/jacoco/index.html
 [26]: https://www.eclipse.org/legal/epl-2.0/
 [27]: http://sonarsource.github.io/sonar-scanner-maven/
