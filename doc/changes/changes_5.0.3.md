@@ -10,9 +10,26 @@ Code name:
 
 ## Dependency Updates
 
+### Compile Dependency Updates
+
+* Updated `com.exasol:virtual-schema-common-jdbc:12.0.0` to `12.0.1`
+
 ### Test Dependency Updates
 
+* Updated `com.exasol:exasol-testcontainers:7.1.1` to `7.1.5`
+* Updated `com.exasol:hamcrest-resultset-matcher:1.7.0` to `1.7.1`
+* Updated `com.exasol:udf-debugging-java:0.6.13` to `0.6.16`
+* Updated `com.exasol:virtual-schema-common-jdbc:12.0.0` to `12.0.1`
+* Updated `com.exasol:virtual-schema-shared-integration-tests:3.0.0` to `3.0.1`
+* Removed `com.google.protobuf:protobuf-java:4.28.2`
+* Updated `com.mysql:mysql-connector-j:9.0.0` to `9.3.0`
 * Updated `org.jacoco:org.jacoco.agent:0.8.12` to `0.8.13`
+* Added `org.junit.jupiter:junit-jupiter-api:5.13.0`
+* Removed `org.junit.jupiter:junit-jupiter:5.11.0`
+* Updated `org.mockito:mockito-junit-jupiter:5.13.0` to `5.18.0`
+* Updated `org.slf4j:slf4j-jdk14:2.0.16` to `2.0.17`
+* Updated `org.testcontainers:junit-jupiter:1.20.1` to `1.21.1`
+* Updated `org.testcontainers:mysql:1.20.1` to `1.21.1`
 
 ### Plugin Dependency Updates
 

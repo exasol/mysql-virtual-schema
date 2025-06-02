@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects.mysql;
 
 import static com.exasol.adapter.dialects.mysql.MySQLColumnMetadataReader.TEXT_DATA_TYPE_SIZE;
+import static com.exasol.adapter.dialects.mysql.MySQLColumnMetadataReader.TIME_FRACTIONAL_SECONDS_PRECISION;
 import static com.exasol.adapter.metadata.DataType.MAX_EXASOL_VARCHAR_SIZE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,7 +28,8 @@ class MySQLColumnMetadataReaderTest {
     @Test
     void mapTime() {
         final JDBCTypeDescription typeDescription = new JDBCTypeDescription(Types.TIME, 0, 0, 10, "TIME");
-        assertThat(this.columnMetadataReader.mapJdbcType(typeDescription), equalTo(DataType.createTimestamp(false)));
+        assertThat(this.columnMetadataReader.mapJdbcType(typeDescription),
+                equalTo(DataType.createTimestamp(false, TIME_FRACTIONAL_SECONDS_PRECISION)));
     }
 
     @Test

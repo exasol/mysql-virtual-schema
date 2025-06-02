@@ -15,6 +15,7 @@ import com.exasol.adapter.metadata.DataType;
 public class MySQLColumnMetadataReader extends BaseColumnMetadataReader {
     private static final String TEXT_DATA_TYPE_NAME = "TEXT";
     protected static final int TEXT_DATA_TYPE_SIZE = 65535;
+    protected static final int TIME_FRACTIONAL_SECONDS_PRECISION = 3;
 
     /**
      * Create a new instance of the {@link MySQLColumnMetadataReader}.
@@ -32,7 +33,7 @@ public class MySQLColumnMetadataReader extends BaseColumnMetadataReader {
     public DataType mapJdbcType(final JDBCTypeDescription jdbcTypeDescription) {
         switch (jdbcTypeDescription.getJdbcType()) {
         case Types.TIME:
-            return DataType.createTimestamp(false);
+            return DataType.createTimestamp(false, TIME_FRACTIONAL_SECONDS_PRECISION);
         case Types.BINARY:
             return DataType.createUnsupported();
         case Types.LONGVARCHAR:
