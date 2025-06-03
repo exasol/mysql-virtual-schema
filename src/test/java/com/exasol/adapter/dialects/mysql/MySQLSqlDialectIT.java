@@ -7,7 +7,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,7 +22,6 @@ import com.exasol.adapter.properties.DataTypeDetection;
 import com.exasol.containers.ExasolDockerImageReference;
 import com.exasol.dbbuilder.dialects.*;
 import com.exasol.dbbuilder.dialects.exasol.VirtualSchema;
-import com.exasol.dbbuilder.dialects.mysql.MySQLIdentifier;
 import com.exasol.dbbuilder.dialects.mysql.MySqlSchema;
 import com.exasol.matcher.TypeMatchMode;
 
@@ -56,7 +54,7 @@ class MySQLSqlDialectIT {
     }
 
     @AfterAll
-    static void afterAll() throws IOException {
+    static void afterAll() {
         SETUP.close();
     }
 
@@ -149,7 +147,7 @@ class MySQLSqlDialectIT {
     }
 
     @Test
-    void importDataTypesFromResultSet() throws SQLException {
+    void importDataTypesFromResultSet() {
         Assume.assumeTrue(runCharsetTest());
 
         final Exception exception = assertThrows(DatabaseObjectException.class, () -> {
@@ -159,7 +157,7 @@ class MySQLSqlDialectIT {
     }
 
     @Test
-    void importDataTypesExasolCalculated() throws SQLException {
+    void importDataTypesExasolCalculated() {
         Assume.assumeTrue(runCharsetTest());
         assertDoesNotThrow(() -> setupMySQLTableWithLatin1AndVirtualSchemaWithStrategy(
                 DataTypeDetection.Strategy.EXASOL_CALCULATED));
@@ -208,20 +206,17 @@ class MySQLSqlDialectIT {
 
     private void createMySqlTableContainingCharAndEnumWithCharacterSet(final String schemaName, final String tableName,
             final String characterSet) {
-
-        this.sourceSchema = getSchemaWithCharacterSet(schemaName, "latin1");
+        this.sourceSchema = SETUP.getMySqlObjectFactory().createSchema(schemaName);
 
         final String mySqlEnum = "ENUM('A', " + SPECIAL_CHAR_QUOTED + ")";
 
-        final Table table = this.sourceSchema.createTable(tableName, List.of("c1", "c2"),
-                List.of("CHAR(1)", mySqlEnum));
+        final Table table = this.sourceSchema.createTableBuilder(tableName)
+                .charset(characterSet)
+                .column("c1", "CHAR(1)")
+                .column("c2", mySqlEnum)
+                .build();
 
         table.insert(SPECIAL_CHAR, SPECIAL_CHAR);
-    }
-
-    private static MySqlSchema getSchemaWithCharacterSet(final String schemaName, final String characterSet) {
-        // See https://github.com/exasol/test-db-builder-java/issues/134
-        return new MySqlSchema(SETUP.getTableWriterWithCharacterSet(characterSet), MySQLIdentifier.of(schemaName));
     }
 
     @Test
