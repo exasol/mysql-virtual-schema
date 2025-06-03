@@ -33,6 +33,7 @@ public class MySQLColumnMetadataReader extends BaseColumnMetadataReader {
     public DataType mapJdbcType(final JDBCTypeDescription jdbcTypeDescription) {
         switch (jdbcTypeDescription.getJdbcType()) {
         case Types.TIME:
+        case Types.TIMESTAMP:
             return DataType.createTimestamp(false, TIME_FRACTIONAL_SECONDS_PRECISION);
         case Types.BINARY:
             return DataType.createUnsupported();
