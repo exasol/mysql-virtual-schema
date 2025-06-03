@@ -18,6 +18,7 @@ Code name:
 
 * Updated `com.exasol:exasol-testcontainers:7.1.1` to `7.1.5`
 * Updated `com.exasol:hamcrest-resultset-matcher:1.7.0` to `1.7.1`
+* Updated `com.exasol:test-db-builder-java:3.5.2` to `3.6.1`
 * Updated `com.exasol:udf-debugging-java:0.6.13` to `0.6.16`
 * Updated `com.exasol:virtual-schema-common-jdbc:12.0.0` to `12.0.1`
 * Updated `com.exasol:virtual-schema-shared-integration-tests:3.0.0` to `3.0.1`
