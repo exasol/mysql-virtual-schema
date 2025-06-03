@@ -7,10 +7,8 @@ public final class IntegrationTestConstants {
     public static final String MYSQL_DOCKER_IMAGE_REFERENCE = "mysql:9.0.1";
     public static final Path PATH_TO_VIRTUAL_SCHEMAS_JAR = Path.of("target", VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
     public static final String SCHEMA_EXASOL = "SCHEMA_EXASOL";
-    public static final String ADAPTER_SCRIPT_EXASOL = "ADAPTER_SCRIPT_EXASOL";
     public static final String TABLE_JOIN_1 = "TABLE_JOIN_1";
     public static final String TABLE_JOIN_2 = "TABLE_JOIN_2";
-    public static final String DOCKER_IP_ADDRESS = "172.17.0.1";
 
     public static final String JDBC_DRIVER_NAME = "mysql-connector-j.jar";
     public static final Path JDBC_DRIVER_PATH = Path.of("target", "mysql-driver", JDBC_DRIVER_NAME);
