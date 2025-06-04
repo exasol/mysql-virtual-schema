@@ -165,8 +165,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     }
 
     public ColumnInspector getColumnInspector(final String catalogName) {
-        return ColumnInspector.from(this.mySqlConnection, catalogName,
-                this.exasolContainer.getDockerImageReference().toString());
+        return ColumnInspector.from(this.mySqlConnection, catalogName, EXASOL_VERSION);
     }
 
     @Override
