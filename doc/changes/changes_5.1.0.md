@@ -1,10 +1,10 @@
-# Virtual Schema for MySQL 5.0.3, released 2025-06-04
+# Virtual Schema for MySQL 5.1.0, released 2025-06-04
 
 Code name: Timestamp precision
 
 ## Summary
 
-This release improves the support for columns types with fractional second precision (FSP), i.e. TIME, DATETIME and 
+This release improves the support for columns types with fractional second precision (FSP), i.e. TIME, DATETIME and
 TIMESTAMP. The specified FSP will be maintained in the Exasol.
 
 This release also contains a security update. We updated the dependencies of the project to fix transitive security issues.
