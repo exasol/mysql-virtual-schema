@@ -5,7 +5,7 @@ Code name: Timestamp precision
 ## Summary
 
 This release improves the support for columns types with fractional second precision (FSP), i.e. TIME, DATETIME and
-TIMESTAMP. The specified FSP will be maintained in the Exasol.
+TIMESTAMP. The specified FSP will be maintained in Exasol newer versions (>= 8.32.0)
 
 This release also contains a security update. We updated the dependencies of the project to fix transitive security issues.
 
