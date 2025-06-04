@@ -7,7 +7,7 @@
     <description>Virtual Schema for MySQL</description>
     <url>https://github.com/exasol/mysql-virtual-schema/</url>
     <properties>
-        <vscjdbc.version>12.0.1</vscjdbc.version>
+        <vscjdbc.version>13.0.0</vscjdbc.version>
         <org.testcontainers.version>1.21.1</org.testcontainers.version>
     </properties>
     <dependencies>

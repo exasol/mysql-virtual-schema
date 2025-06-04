@@ -3,6 +3,7 @@ package com.exasol.adapter.dialects.mysql;
 import java.sql.Connection;
 import java.util.Set;
 
+import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.jdbc.*;
@@ -17,19 +18,21 @@ public class MySQLMetadataReader extends AbstractRemoteMetadataReader {
      * @param connection JDBC connection to the remote data source
      * @param properties user-defined adapter properties
      */
-    public MySQLMetadataReader(final Connection connection, final AdapterProperties properties) {
-        super(connection, properties);
+    public MySQLMetadataReader(final Connection connection, final AdapterProperties properties,
+                final ExaMetadata exaMetadata) {
+        super(connection, properties, exaMetadata);
     }
 
     @Override
     protected ColumnMetadataReader createColumnMetadataReader() {
-        return new MySQLColumnMetadataReader(this.connection, this.properties, this.identifierConverter);
+        return new MySQLColumnMetadataReader(this.connection, this.properties, this.exaMetadata,
+                this.identifierConverter);
     }
 
     @Override
     protected TableMetadataReader createTableMetadataReader() {
         return new BaseTableMetadataReader(this.connection, this.columnMetadataReader, this.properties,
-                this.identifierConverter);
+                this.exaMetadata, this.identifierConverter);
     }
 
     @Override

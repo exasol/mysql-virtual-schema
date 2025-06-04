@@ -43,7 +43,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 --/
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/bfsdefault/default/virtual-schema-dist-12.0.1-mysql-5.0.3.jar;
+    %jar /buckets/bfsdefault/default/virtual-schema-dist-13.0.0-mysql-5.0.3.jar;
     %jar /buckets/bfsdefault/default/mysql-connector-java-<version>.jar;
 /
 ;
@@ -81,37 +81,40 @@ See also [Adapter Properties for JDBC-Based Virtual Schemas](https://github.com/
 
 ## Data Types Conversion
 
-| MySQL Data Type | Supported | Converted Exasol Data Type| Known limitations                                          |
-|-----------------|-----------|---------------------------|------------------------------------------------------------|
-| BOOLEAN         |  ✓        | BOOLEAN                   |                                                            |
-| BIGINT          |  ✓        | DECIMAL                   |                                                            |
-| BINARY          |  ×        |                           |                                                            |
-| BIT             |  ✓        | BOOLEAN                   |                                                            |
-| BLOB            |  ×        |                           |                                                            |
-| CHAR            |  ✓        | CHAR                      |                                                            |
-| DATE            |  ✓        | DATE                      |                                                            |
-| DATETIME        |  ✓        | TIMESTAMP                 |                                                            |
-| DECIMAL         |  ✓        | DECIMAL                   |                                                            |
-| DOUBLE          |  ✓        | DOUBLE PRECISION          |                                                            |
-| ENUM            |  ✓        | CHAR                      |                                                            |
-| FLOAT           |  ✓        | DOUBLE PRECISION          |                                                            |
-| INT             |  ✓        | DECIMAL                   |                                                            |
-| LONGBLOB        |  ×        |                           |                                                            |
-| LONGTEXT        |  ✓        | VARCHAR(2000000)          |                                                            |
-| MEDIUMBLOB      |  ×        |                           |                                                            |
-| MEDIUMINT       |  ✓        | DECIMAL                   |                                                            |
-| MEDIUMTEXT      |  ✓        | VARCHAR(2000000)          |                                                            |
-| SET             |  ✓        | CHAR                      |                                                            |
-| SMALLINT        |  ✓        | DECIMAL                   |                                                            |
-| TEXT            |  ✓        | VARCHAR(65535)            | The size of the column is always 65535.*                   |
-| TINYBLOB        |  ×        |                           |                                                            |
-| TINYINT         |  ✓        | DECIMAL                   |                                                            |
-| TINYTEXT        |  ✓        | VARCHAR                   |                                                            |
-| TIME            |  ✓        | TIMESTAMP                 | Casted to `TIMESTAMP` with a format `1970-01-01 hh:mm:ss`. |
-| TIMESTAMP       |  ✓        | TIMESTAMP                 |                                                            |
-| VARBINARY       |  ×        |                           |                                                            |
-| VARCHAR         |  ✓        | VARCHAR                   |                                                            |
-| YEAR            |  ✓        | DATE                      |                                                            |
+| MySQL Data Type | Supported | Converted Exasol Data Type| Known limitations                                              |
+|-----------------|-----------|---------------------------|----------------------------------------------------------------|
+| BOOLEAN         |  ✓        | BOOLEAN                   |                                                                |
+| BIGINT          |  ✓        | DECIMAL                   |                                                                |
+| BINARY          |  ×        |                           |                                                                |
+| BIT             |  ✓        | BOOLEAN                   |                                                                |
+| BLOB            |  ×        |                           |                                                                |
+| CHAR            |  ✓        | CHAR                      |                                                                |
+| DATE            |  ✓        | DATE                      |                                                                |
+| DATETIME        |  ✓        | TIMESTAMP                 | (1)                                                            |
+| DECIMAL         |  ✓        | DECIMAL                   |                                                                |
+| DOUBLE          |  ✓        | DOUBLE PRECISION          |                                                                |
+| ENUM            |  ✓        | CHAR                      |                                                                |
+| FLOAT           |  ✓        | DOUBLE PRECISION          |                                                                |
+| INT             |  ✓        | DECIMAL                   |                                                                |
+| LONGBLOB        |  ×        |                           |                                                                |
+| LONGTEXT        |  ✓        | VARCHAR(2000000)          |                                                                |
+| MEDIUMBLOB      |  ×        |                           |                                                                |
+| MEDIUMINT       |  ✓        | DECIMAL                   |                                                                |
+| MEDIUMTEXT      |  ✓        | VARCHAR(2000000)          |                                                                |
+| SET             |  ✓        | CHAR                      |                                                                |
+| SMALLINT        |  ✓        | DECIMAL                   |                                                                |
+| TEXT            |  ✓        | VARCHAR(65535)            | The size of the column is always 65535.*                       |
+| TINYBLOB        |  ×        |                           |                                                                |
+| TINYINT         |  ✓        | DECIMAL                   |                                                                |
+| TINYTEXT        |  ✓        | VARCHAR                   |                                                                |
+| TIME            |  ✓        | TIMESTAMP                 | (1) Casted to `TIMESTAMP` with a format `1970-01-01 hh:mm:ss`. |
+| TIMESTAMP       |  ✓        | TIMESTAMP                 | (1)                                                            |
+| VARBINARY       |  ×        |                           |                                                                |
+| VARCHAR         |  ✓        | VARCHAR                   |                                                                |
+| YEAR            |  ✓        | DATE                      |                                                                |
+
+(1) Types TIME, DATETIME and TIMESTAMP with fractional second precision are mapped to TIMESTAMP with milliseconds precision
+for Exasol versions up to 8.31. Starting with Exasol 8.32 they are mapped with the same specified precision as in MySQL. 
 
 * The tested versions of MySQL Connector JDBC Driver return the column's size depending on the charset and its collation.
 As the real data in a MySQL table can sometimes exceed the size that we get from the JDBC driver, we set the size for all TEXT columns to 65535 characters.
@@ -126,4 +129,5 @@ In the following matrix you find combinations of JDBC driver and dialect version
 |------------------------|---------------|-----------------|----------------|
 | 4.1.3                  | MySQL 8.0.23  | MySQL Connector | 8.0.23         |
 | 5.0.1                  | MySQL 8.1.0   | MySQL Connector | 8.1.0          |
-| Latest                 | MySQL 9.0.1   | MySQL Connector | 9.0.1          |
+| 5.0.2                  | MySQL 9.0.1   | MySQL Connector | 9.0.1          |
+| Latest                 | MySQL 9.0.1   | MySQL Connector | 9.3.0          |

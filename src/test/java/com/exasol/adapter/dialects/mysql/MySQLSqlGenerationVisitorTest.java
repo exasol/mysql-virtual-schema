@@ -1,12 +1,15 @@
 package com.exasol.adapter.dialects.mysql;
 
+import static com.exasol.adapter.dialects.mysql.IntegrationTestConstants.EXASOL_VERSION;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.lenient;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.exasol.ExaMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,11 +30,15 @@ import com.exasol.adapter.sql.*;
 class MySQLSqlGenerationVisitorTest {
     private SqlNodeVisitor<String> visitor;
 
+    @Mock
+    private ExaMetadata exaMetadataMock;
+
     @BeforeEach
     void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) {
+        lenient().when(exaMetadataMock.getDatabaseVersion()).thenReturn(EXASOL_VERSION);
         final SqlDialectFactory dialectFactory = new MySQLSqlDialectFactory();
         final SqlDialect dialect = dialectFactory.createSqlDialect(connectionFactoryMock,
-                AdapterProperties.emptyProperties());
+                AdapterProperties.emptyProperties(), exaMetadataMock);
         final SqlGenerationContext context = new SqlGenerationContext("test_catalog", "test_schema", false);
         this.visitor = new MySQLSqlGenerationVisitor(dialect, context);
     }

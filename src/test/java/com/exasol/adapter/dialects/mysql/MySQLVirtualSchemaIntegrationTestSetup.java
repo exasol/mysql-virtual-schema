@@ -40,7 +40,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     private final MySQLContainer<?> mySqlContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE_REFERENCE)
             .withUsername("root").withPassword("");
 
-    private final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>("8.34.0")
+    private final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(EXASOL_VERSION)
             .withRequiredServices(ExasolService.BUCKETFS, ExasolService.UDF).withReuse(true);
 
     private final Connection exasolConnection;
@@ -165,7 +165,8 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     }
 
     public ColumnInspector getColumnInspector(final String catalogName) {
-        return ColumnInspector.from(this.mySqlConnection, catalogName);
+        return ColumnInspector.from(this.mySqlConnection, catalogName,
+                this.exasolContainer.getDockerImageReference().toString());
     }
 
     @Override

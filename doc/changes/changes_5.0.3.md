@@ -1,18 +1,30 @@
-# Virtual Schema for MySQL 5.0.3, released 2025-??-??
+# Virtual Schema for MySQL 5.0.3, released 2025-06-04
 
-Code name:
+Code name: Timestamp precision
 
 ## Summary
 
+This release improves the support for columns types with fractional second precision (FSP), i.e. TIME, DATETIME and 
+TIMESTAMP. The specified FSP will be maintained in the Exasol.
+
+This release also contains a security update. We updated the dependencies of the project to fix transitive security issues.
+
+We also added an exception for the OSSIndex for CVE-2024-55551, which is a false positive in Exasol's JDBC driver.
+This issue has been fixed quite a while back now, but the OSSIndex unfortunately does not contain the fix version of 24.2.1 (2024-12-10) set.
+
 ## Features
 
-* ISSUE_NUMBER: description
+* #48: TS(9) support in MySQL VS
+
+## Security
+
+* #53: Fix CVE-2024-55551 in com.exasol:exasol-jdbc:jar:24.1.1:test
 
 ## Dependency Updates
 
 ### Compile Dependency Updates
 
-* Updated `com.exasol:virtual-schema-common-jdbc:12.0.0` to `12.0.1`
+* Updated `com.exasol:virtual-schema-common-jdbc:12.0.0` to `13.0.0`
 
 ### Test Dependency Updates
 
@@ -20,7 +32,7 @@ Code name:
 * Updated `com.exasol:hamcrest-resultset-matcher:1.7.0` to `1.7.1`
 * Updated `com.exasol:test-db-builder-java:3.5.2` to `3.6.1`
 * Updated `com.exasol:udf-debugging-java:0.6.13` to `0.6.16`
-* Updated `com.exasol:virtual-schema-common-jdbc:12.0.0` to `12.0.1`
+* Updated `com.exasol:virtual-schema-common-jdbc:12.0.0` to `13.0.0`
 * Updated `com.exasol:virtual-schema-shared-integration-tests:3.0.0` to `3.0.1`
 * Removed `com.google.protobuf:protobuf-java:4.28.2`
 * Updated `com.mysql:mysql-connector-j:9.0.0` to `9.3.0`

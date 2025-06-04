@@ -1,10 +1,11 @@
 package com.exasol.adapter.dialects.mysql.charset;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.exasol.ExaMetadata;
+import com.exasol.ExaMetadataStub;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.adapternotes.ColumnAdapterNotes;
@@ -19,16 +20,19 @@ import com.exasol.adapter.metadata.ColumnMetadata;
  */
 public class ColumnInspector {
 
-    public static ColumnInspector from(final Connection mySqlConnection, final String catalogName) {
+    public static ColumnInspector from(final Connection mySqlConnection, final String catalogName,
+                final String exasolVersion) {
         return new ColumnInspector(mySqlConnection,
-                getMetadataReader(mySqlConnection, catalogName).getColumnMetadataReader());
+                getMetadataReader(mySqlConnection, catalogName, exasolVersion).getColumnMetadataReader());
     }
 
     private static final Logger LOGGER = Logger.getLogger(ColumnInspector.class.getName());
 
-    private static MySQLMetadataReader getMetadataReader(final Connection mySqlConnection, final String catalogName) {
-        return new MySQLMetadataReader(mySqlConnection, //
-                new AdapterProperties(Map.of(AdapterProperties.CATALOG_NAME_PROPERTY, catalogName)));
+    private static MySQLMetadataReader getMetadataReader(final Connection mySqlConnection, final String catalogName,
+                final String exasolVersion) {
+        final ExaMetadata exaMetadata = ExaMetadataStub.builder().databaseVersion(exasolVersion).build();
+        return new MySQLMetadataReader(mySqlConnection,
+                new AdapterProperties(Map.of(AdapterProperties.CATALOG_NAME_PROPERTY, catalogName)), exaMetadata);
     }
 
     private final Connection mySqlConnection;
@@ -39,14 +43,14 @@ public class ColumnInspector {
         this.columnMetadataReader = columnMetadataReader;
     }
 
-    public void describeFromMetadata(final String catalogName, final String tableName) throws SQLException {
+    public void describeFromMetadata(final String tableName) {
         LOGGER.info(() -> "Column Metadata for MySQL table '" + tableName + "' provided by JDBC driver:");
         for (final ColumnMetadata column : this.columnMetadataReader.mapColumns(tableName)) {
             LOGGER.info(() -> "- " + describeColumn(column));
         }
     }
 
-    public void describeFromQuery(final String catalogName, final String query) throws SQLException {
+    public void describeFromQuery(final String query) {
         LOGGER.info(() -> "Column descriptions from query '" + query + "', as provided by JDBC driver: "
                 + getResultSetMetadataReader().describeColumns(query));
     }

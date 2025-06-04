@@ -12,7 +12,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.hamcrest.Matcher;
-import org.junit.Assume;
 import org.junit.jupiter.api.*;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -118,11 +117,11 @@ class MySQLSqlDialectIT {
                         "date_col", "datetime_col", "timestamp_col", "time_col", "year_col"),
                 List.of("BIT(6)", "TINYINT", "BOOLEAN", "SMALLINT", "MEDIUMINT", "INT", "BIGINT", "DECIMAL(5, 2)",
                         "FLOAT(7, 4)", "DOUBLE", //
-                        "DATE", "DATETIME", "TIMESTAMP", "TIME", "YEAR"));
+                        "DATE", "DATETIME", "TIMESTAMP(6)", "TIME(4)", "YEAR"));
         table.insert("5", 127, 1, 32767, 8388607, 2147483647, 9223372036854775807L, 999.99, 999.00009, 999.00009, //
-                "1000-01-01", "1000-01-01 00:00:00", "1970-01-01 00:00:01.000000", "16:59:59.000000", 1901);
+                "1000-01-01", "1000-01-01 00:00:00", "1970-01-01 00:00:01.123456", "16:59:59.1234", 1901);
         table.insert("9", -127, 0, -32768, -8388608, -2147483648, -9223372036854775808L, -999.99, -999.9999, -999.9999, //
-                "9999-12-31", "9999-12-31 22:59:59", "2037-01-19 03:14:07.999999", "05:34:13.000000", 2155);
+                "9999-12-31", "9999-12-31 22:59:59", "2037-01-19 03:14:07.999999", "05:34:13.9999", 2155);
         table.insert(null, 0, true, 0, 0, 0, 0, 0, 0, 0, //
                 null, null, null, null, "1901");
         table.insert(null, 0, false, 0, 0, 0, 0, 0, 0, 0, //
@@ -148,7 +147,7 @@ class MySQLSqlDialectIT {
 
     @Test
     void importDataTypesFromResultSet() {
-        Assume.assumeTrue(runCharsetTest());
+        Assumptions.assumeTrue(runCharsetTest());
 
         final Exception exception = assertThrows(DatabaseObjectException.class, () -> {
             setupMySQLTableWithLatin1AndVirtualSchemaWithStrategy(DataTypeDetection.Strategy.FROM_RESULT_SET);
@@ -158,7 +157,7 @@ class MySQLSqlDialectIT {
 
     @Test
     void importDataTypesExasolCalculated() {
-        Assume.assumeTrue(runCharsetTest());
+        Assumptions.assumeTrue(runCharsetTest());
         assertDoesNotThrow(() -> setupMySQLTableWithLatin1AndVirtualSchemaWithStrategy(
                 DataTypeDetection.Strategy.EXASOL_CALCULATED));
     }
@@ -178,8 +177,19 @@ class MySQLSqlDialectIT {
         return false;
     }
 
-    private String setupMySQLTableWithLatin1AndVirtualSchemaWithStrategy(final DataTypeDetection.Strategy strategy)
-            throws SQLException {
+    private boolean supportTimestampPrecision() {
+        final ExasolDockerImageReference dockerImage = SETUP.getExasolContainer().getDockerImageReference();
+        if (!dockerImage.hasMajor() || !dockerImage.hasMinor() || !dockerImage.hasFix()) {
+            return false;
+        }
+        final Version version = Version.of(dockerImage.getMajor(), dockerImage.getMinor(), dockerImage.getFixVersion());
+        if ((dockerImage.getMajor() == 8) && version.isGreaterOrEqualThan(Version.parse("8.32.0"))) {
+            return true;
+        }
+        return false;
+    }
+
+    private String setupMySQLTableWithLatin1AndVirtualSchemaWithStrategy(final DataTypeDetection.Strategy strategy) {
         final String tableName = MYSQL_SOURCE_TABLE;
         createMySqlTableContainingCharAndEnumWithCharacterSet(MYSQL_SOURCE_SCHEMA, tableName, "latin1");
 
@@ -188,10 +198,10 @@ class MySQLSqlDialectIT {
                 MYSQL_SOURCE_SCHEMA);
 
         final ColumnInspector inspector = SETUP.getColumnInspector(MYSQL_SOURCE_SCHEMA);
-        inspector.describeFromMetadata(MYSQL_SOURCE_SCHEMA, MYSQL_SOURCE_TABLE);
+        inspector.describeFromMetadata(MYSQL_SOURCE_TABLE);
 
         final String query = String.format("select * from %s.%s", MYSQL_SOURCE_SCHEMA, MYSQL_SOURCE_TABLE);
-        inspector.describeFromQuery(MYSQL_SOURCE_SCHEMA, query);
+        inspector.describeFromQuery(query);
 
         return selectEverythingFromVirtualSchemaTable(tableName);
     }
@@ -549,20 +559,42 @@ class MySQLSqlDialectIT {
         }
 
         @Test
-        void testTimestamp() throws SQLException {
+        void testTimestampWithCustomPrecision() throws SQLException {
+            Assumptions.assumeTrue(supportTimestampPrecision());
             final String query = "SELECT \"timestamp_col\" FROM " + virtualSchemaJdbc + "."
                     + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
             final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
-                    List.of("'1970-01-01 00:00:01.000000'", "'2037-01-19 03:14:08.0'", "null", "null"));
+                    List.of("'1970-01-01 00:00:01.123456'", "'2037-01-19 03:14:07.999999'", "null", "null"));
             assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
         @Test
-        void testTime() throws SQLException {
+        void testTimestampWithDefaultPrecision() throws SQLException {
+            Assumptions.assumeFalse(supportTimestampPrecision());
+            final String query = "SELECT \"timestamp_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
+                    List.of("'1970-01-01 00:00:01.123'", "'2037-01-19 03:14:07.999'", "null", "null"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testTimeWithCustomPrecision() throws SQLException {
+            Assumptions.assumeTrue(supportTimestampPrecision());
             final String query = "SELECT \"time_col\" FROM " + virtualSchemaJdbc + "."
                     + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
             final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
-                    List.of("'1970-01-01 16:59:59.000000'", "'1970-01-01 05:34:13.000000'", "null", "null"));
+                    List.of("'1970-01-01 16:59:59.1234'", "'1970-01-01 05:34:13.9999'", "null", "null"));
+            assertThat(getActualResultSet(query), matchesResultSet(expected));
+        }
+
+        @Test
+        void testTimeWithDefaultPrecision() throws SQLException {
+            Assumptions.assumeFalse(supportTimestampPrecision());
+            final String query = "SELECT \"time_col\" FROM " + virtualSchemaJdbc + "."
+                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
+            final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
+                    List.of("'1970-01-01 16:59:59.123'", "'1970-01-01 05:34:13.999'", "null", "null"));
             assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 

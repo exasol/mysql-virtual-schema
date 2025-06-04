@@ -1,28 +1,38 @@
 package com.exasol.adapter.dialects.mysql;
 
+import com.exasol.ExaMetadata;
+import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.BaseIdentifierConverter;
+import com.exasol.adapter.jdbc.JDBCTypeDescription;
+import com.exasol.adapter.metadata.DataType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.sql.Types;
+
+import static com.exasol.adapter.dialects.mysql.IntegrationTestConstants.EXASOL_VERSION;
 import static com.exasol.adapter.dialects.mysql.MySQLColumnMetadataReader.TEXT_DATA_TYPE_SIZE;
 import static com.exasol.adapter.dialects.mysql.MySQLColumnMetadataReader.TIME_FRACTIONAL_SECONDS_PRECISION;
 import static com.exasol.adapter.metadata.DataType.MAX_EXASOL_VARCHAR_SIZE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.when;
 
-import java.sql.Types;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.BaseIdentifierConverter;
-import com.exasol.adapter.jdbc.JDBCTypeDescription;
-import com.exasol.adapter.metadata.DataType;
-
+@ExtendWith(MockitoExtension.class)
 class MySQLColumnMetadataReaderTest {
     private MySQLColumnMetadataReader columnMetadataReader;
 
+    @Mock
+    private ExaMetadata exaMetadataMock;
+
     @BeforeEach
     void beforeEach() {
+        when(exaMetadataMock.getDatabaseVersion()).thenReturn(EXASOL_VERSION);
         this.columnMetadataReader = new MySQLColumnMetadataReader(null, AdapterProperties.emptyProperties(),
-                BaseIdentifierConverter.createDefault());
+                exaMetadataMock, BaseIdentifierConverter.createDefault());
     }
 
     @Test
