@@ -563,7 +563,7 @@ class MySQLSqlDialectIT {
             Assumptions.assumeTrue(supportTimestampPrecision());
             final String query = "SELECT \"timestamp_col\" FROM " + virtualSchemaJdbc + "."
                     + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
+            final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP(6)"), //
                     List.of("'1970-01-01 00:00:01.123456'", "'2037-01-19 03:14:07.999999'", "null", "null"));
             assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
@@ -583,7 +583,7 @@ class MySQLSqlDialectIT {
             Assumptions.assumeTrue(supportTimestampPrecision());
             final String query = "SELECT \"time_col\" FROM " + virtualSchemaJdbc + "."
                     + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
+            final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP(4)"), //
                     List.of("'1970-01-01 16:59:59.1234'", "'1970-01-01 05:34:13.9999'", "null", "null"));
             assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
