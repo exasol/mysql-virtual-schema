@@ -6,6 +6,7 @@ sources:
       - udf_coverage
       - jar_artifact
 build:
+  runnerOs: ubuntu-24.04
   freeDiskSpace: false
   exasolDbVersions:
     - "8.34.0"
