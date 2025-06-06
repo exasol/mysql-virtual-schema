@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 5.1.0, released 2025-06-05
+# Virtual Schema for MySQL 5.1.0, released 2025-06-06
 
 Code name: Timestamp precision
 
