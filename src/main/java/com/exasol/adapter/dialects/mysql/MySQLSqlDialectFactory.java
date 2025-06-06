@@ -1,5 +1,6 @@
 package com.exasol.adapter.dialects.mysql;
 
+import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.SqlDialectFactory;
@@ -11,8 +12,9 @@ import com.exasol.logging.VersionCollector;
  */
 public class MySQLSqlDialectFactory  implements SqlDialectFactory {
     @Override
-    public SqlDialect createSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
-        return new MySQLSqlDialect(connectionFactory, properties);
+    public SqlDialect createSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties,
+                final ExaMetadata exaMetadata) {
+        return new MySQLSqlDialect(connectionFactory, properties, exaMetadata);
     }
 
     @Override

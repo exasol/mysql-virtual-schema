@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.capabilities.ScalarFunctionCapability;
@@ -47,8 +48,9 @@ public class MySQLSqlDialect extends AbstractSqlDialect {
      * @param connectionFactory factory for the JDBC connection to the Athena service
      * @param properties        user-defined adapter properties
      */
-    public MySQLSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties) {
-        super(connectionFactory, properties, Set.of(CATALOG_NAME_PROPERTY));
+    public MySQLSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties,
+                final ExaMetadata exaMetadata) {
+        super(connectionFactory, properties, exaMetadata, Set.of(CATALOG_NAME_PROPERTY));
     }
 
     private static Capabilities createCapabilityList() {
@@ -121,7 +123,7 @@ public class MySQLSqlDialect extends AbstractSqlDialect {
     @Override
     protected RemoteMetadataReader createRemoteMetadataReader() {
         try {
-            return new MySQLMetadataReader(this.connectionFactory.getConnection(), this.properties);
+            return new MySQLMetadataReader(this.connectionFactory.getConnection(), this.properties, this.exaMetadata);
         } catch (final SQLException exception) {
             throw new RemoteMetadataReaderException(ExaError.messageBuilder("E-VSMYSQL-1")
                     .message("Unable to create MySQL remote metadata reader. Caused by: {{cause|uq}}")

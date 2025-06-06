@@ -12,20 +12,19 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.github.dockerjava.api.model.ContainerNetwork;
+import com.github.dockerjava.api.model.NetworkSettings;
 import org.testcontainers.containers.MySQLContainer;
 
 import com.exasol.adapter.dialects.mysql.charset.ColumnInspector;
-import com.exasol.adapter.dialects.mysql.charset.TableWriterWithCharacterSet;
 import com.exasol.bucketfs.Bucket;
 import com.exasol.bucketfs.BucketAccessException;
 import com.exasol.containers.ExasolContainer;
 import com.exasol.containers.ExasolService;
 import com.exasol.dbbuilder.dialects.exasol.*;
-import com.exasol.dbbuilder.dialects.mysql.MySqlImmediateDatabaseObjectWriter;
 import com.exasol.dbbuilder.dialects.mysql.MySqlObjectFactory;
 import com.exasol.errorreporting.ExaError;
 import com.exasol.udfdebugging.UdfTestSetup;
-import com.github.dockerjava.api.model.ContainerNetwork;
 
 /**
  * This class contains the common integration test setup for all MySQL integration test.
@@ -37,10 +36,13 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     private static final Logger LOGGER = Logger.getLogger(MySQLVirtualSchemaIntegrationTestSetup.class.getName());
 
     private final Statement mySqlStatement;
+
     private final MySQLContainer<?> mySqlContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE_REFERENCE)
             .withUsername("root").withPassword("");
-    private final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>("8.31.0")
+
+    private final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(EXASOL_VERSION)
             .withRequiredServices(ExasolService.BUCKETFS, ExasolService.UDF).withReuse(true);
+
     private final Connection exasolConnection;
     private final Statement exasolStatement;
     private final AdapterScript adapterScript;
@@ -68,10 +70,11 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
                     ExasolObjectConfiguration.builder().withJvmOptions(udfTestSetup.getJvmOptions()).build());
 
             final ExasolSchema exasolSchema = this.exasolFactory.createSchema(SCHEMA_EXASOL);
-            this.mySqlObjectFactory = new MySqlObjectFactory(this.mySqlConnection);
             this.adapterScript = createAdapterScript(exasolSchema);
-            final String connectionString = "jdbc:mysql://" + this.exasolContainer.getHostIp() + ":"
-                    + this.mySqlContainer.getMappedPort(MYSQL_PORT) + "/" + this.mySqlContainer.getDatabaseName();
+
+            this.mySqlObjectFactory = new MySqlObjectFactory(this.mySqlConnection);
+
+            final String connectionString = buildMySqlConnectionString(mySqlContainer);
             this.connectionDefinition = this.exasolFactory.createConnectionDefinition("MYSQL_CONNECTION",
                     connectionString, this.mySqlContainer.getUsername(), this.mySqlContainer.getPassword());
             logConnectionInfo();
@@ -81,6 +84,12 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Thread was interrupted");
         }
+    }
+
+    private static String buildMySqlConnectionString(final MySQLContainer<?> mySqlContainer ) {
+        final NetworkSettings networkSettings = mySqlContainer.getContainerInfo().getNetworkSettings();
+        final String ipAddress = networkSettings.getNetworks().values().iterator().next().getIpAddress();
+        return "jdbc:mysql://" + ipAddress + ":" + MYSQL_PORT + "/" + mySqlContainer.getDatabaseName();
     }
 
     private static void uploadDriverToBucket(final Bucket bucket)
@@ -155,12 +164,8 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
                 .properties(properties).build();
     }
 
-    public MySqlImmediateDatabaseObjectWriter getTableWriterWithCharacterSet(final String characterSet) {
-        return new TableWriterWithCharacterSet(this.mySqlConnection, characterSet);
-    }
-
     public ColumnInspector getColumnInspector(final String catalogName) {
-        return ColumnInspector.from(this.mySqlConnection, catalogName);
+        return ColumnInspector.from(this.mySqlConnection, catalogName, EXASOL_VERSION);
     }
 
     @Override
@@ -180,7 +185,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
     private String getTestHostIpFromInsideExasol() {
         final Map<String, ContainerNetwork> networks = this.exasolContainer.getContainerInfo().getNetworkSettings()
                 .getNetworks();
-        if (networks.size() == 0) {
+        if (networks.isEmpty()) {
             return null;
         }
         return networks.values().iterator().next().getGateway();

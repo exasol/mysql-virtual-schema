@@ -5,16 +5,19 @@ import static com.exasol.adapter.capabilities.AggregateFunctionCapability.*;
 import static com.exasol.adapter.capabilities.LiteralCapability.*;
 import static com.exasol.adapter.capabilities.MainCapability.*;
 import static com.exasol.adapter.capabilities.PredicateCapability.*;
+import static com.exasol.adapter.dialects.mysql.IntegrationTestConstants.EXASOL_VERSION;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
 
+import com.exasol.ExaMetadata;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,10 +40,13 @@ class MySQLSqlDialectTest {
     private MySQLSqlDialect dialect;
     @Mock
     private ConnectionFactory connectionFactoryMock;
+    @Mock
+    private ExaMetadata exaMetadataMock;
 
     @BeforeEach
     void beforeEach() {
-        this.dialect = new MySQLSqlDialect(this.connectionFactoryMock, AdapterProperties.emptyProperties());
+        lenient().when(exaMetadataMock.getDatabaseVersion()).thenReturn(EXASOL_VERSION);
+        this.dialect = new MySQLSqlDialect(connectionFactoryMock, AdapterProperties.emptyProperties(), exaMetadataMock);
     }
 
     @Test

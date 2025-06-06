@@ -1,11 +1,14 @@
 package com.exasol.adapter.dialects.mysql;
 
+import static com.exasol.adapter.dialects.mysql.IntegrationTestConstants.EXASOL_VERSION;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 
+import com.exasol.ExaMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,12 +22,16 @@ import com.exasol.adapter.jdbc.BaseTableMetadataReader;
 @ExtendWith(MockitoExtension.class)
 class MySQLMetadataReaderTest {
     private MySQLMetadataReader reader;
+
     @Mock
     private Connection connectionMock;
+    @Mock
+    private ExaMetadata exaMetadataMock;
 
     @BeforeEach
     void beforeEach() {
-        this.reader = new MySQLMetadataReader(this.connectionMock, AdapterProperties.emptyProperties());
+        when(exaMetadataMock.getDatabaseVersion()).thenReturn(EXASOL_VERSION);
+        this.reader = new MySQLMetadataReader(connectionMock, AdapterProperties.emptyProperties(), exaMetadataMock);
     }
 
     @Test
