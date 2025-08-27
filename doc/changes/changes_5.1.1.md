@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 5.1.1, released 2025-08-26
+# Virtual Schema for MySQL 5.1.1, released 2025-08-27
 
 Code name: Fixes for vulnerability CVE-2025-48924
 
