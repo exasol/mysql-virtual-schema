@@ -38,7 +38,7 @@
 | [Apache Maven Toolchains Plugin][32]                    | [Apache-2.0][26]                            |
 | [Apache Maven Compiler Plugin][33]                      | [Apache-2.0][26]                            |
 | [Apache Maven Enforcer Plugin][34]                      | [Apache-2.0][26]                            |
-| [Maven Flatten Plugin][35]                              | [Apache Software Licenese][26]              |
+| [Maven Flatten Plugin][35]                              | [Apache Software License][26]               |
 | [org.sonatype.ossindex.maven:ossindex-maven-plugin][36] | [ASL2][37]                                  |
 | [Maven Surefire Plugin][38]                             | [Apache-2.0][26]                            |
 | [Versions Maven Plugin][39]                             | [Apache License, Version 2.0][26]           |
@@ -59,7 +59,7 @@
 [1]: https://github.com/exasol/virtual-schema-common-jdbc/blob/main/LICENSE
 [2]: http://hamcrest.org/JavaHamcrest/
 [3]: https://raw.githubusercontent.com/hamcrest/JavaHamcrest/master/LICENSE
-[4]: https://junit.org/junit5/
+[4]: https://junit.org/
 [5]: https://www.eclipse.org/legal/epl-v20.html
 [6]: https://github.com/mockito/mockito
 [7]: https://opensource.org/licenses/MIT
@@ -85,7 +85,7 @@
 [27]: https://maven.apache.org/plugins/maven-install-plugin/
 [28]: https://maven.apache.org/plugins/maven-resources-plugin/
 [29]: https://maven.apache.org/plugins/maven-site-plugin/
-[30]: http://docs.sonarqube.org/display/PLUG/Plugin+Library/sonar-scanner-maven/sonar-maven-plugin
+[30]: https://docs.sonarsource.com/sonarqube-server/latest/extension-guide/developing-a-plugin/plugin-basics/sonar-scanner-maven/sonar-maven-plugin/
 [31]: http://www.gnu.org/licenses/lgpl.txt
 [32]: https://maven.apache.org/plugins/maven-toolchains-plugin/
 [33]: https://maven.apache.org/plugins/maven-compiler-plugin/
