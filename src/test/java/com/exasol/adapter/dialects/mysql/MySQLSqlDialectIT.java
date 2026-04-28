@@ -24,10 +24,6 @@ import com.exasol.dbbuilder.dialects.exasol.VirtualSchema;
 import com.exasol.dbbuilder.dialects.mysql.MySqlSchema;
 import com.exasol.matcher.TypeMatchMode;
 
-/**
- * How to run `MySqlSqlDialectIT`: See the documentation <a
- * href="doc/development/developing-sql-dialect/integration_testing_with_containers.md>integration_testing_with_containers.md</a>.
- */
 @Tag("integration")
 @Testcontainers
 class MySQLSqlDialectIT {
