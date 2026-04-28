@@ -1,12 +1,18 @@
-# Virtual Schema for MySQL 6.0.0, released 2026-??-??
+# Virtual Schema for MySQL 6.0.0, released 2026-04-??
 
-Code name:
+Code name: Anonymous telemetry
 
 ## Summary
 
+This release adds anonymous feature-usage telemetry via `telemetry-java`. See the [documentation](https://github.com/exasol/telemetry-java/blob/main/doc/app-user-guide.md) for details on collected data and opt-out behavior.
+
+## Breaking Change
+
+Starting with this release, the MySQL Virtual Schema does not support Exasol versions 7.1 any more. Only LTS version 2025.1.x and the current version are supported.
+
 ## Features
 
-* ISSUE_NUMBER: description
+* #58: Add anonymous feature tracking
 
 ## Dependency Updates
 
