@@ -30,7 +30,7 @@ Starting with this release, the MySQL Virtual Schema does not support Exasol ver
 * Updated `com.exasol:virtual-schema-shared-integration-tests:3.0.1` to `3.0.2`
 * Updated `com.mysql:mysql-connector-j:9.3.0` to `9.6.0`
 * Updated `org.jacoco:org.jacoco.agent:0.8.13` to `0.8.14`
-* Updated `org.junit.jupiter:junit-jupiter-api:5.13.0` to `6.0.3`
+* Updated `org.junit.jupiter:junit-jupiter-api:5.13.0` to `5.14.3`
 * Updated `org.mockito:mockito-junit-jupiter:5.18.0` to `5.23.0`
 * Removed `org.testcontainers:junit-jupiter:1.21.1`
 * Removed `org.testcontainers:mysql:1.21.1`

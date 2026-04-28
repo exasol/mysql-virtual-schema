@@ -12,9 +12,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.github.dockerjava.api.model.ContainerNetwork;
-import com.github.dockerjava.api.model.NetworkSettings;
-import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.mysql.MySQLContainer;
 
 import com.exasol.adapter.dialects.mysql.charset.ColumnInspector;
 import com.exasol.bucketfs.Bucket;
@@ -25,6 +23,8 @@ import com.exasol.dbbuilder.dialects.exasol.*;
 import com.exasol.dbbuilder.dialects.mysql.MySqlObjectFactory;
 import com.exasol.errorreporting.ExaError;
 import com.exasol.udfdebugging.UdfTestSetup;
+import com.github.dockerjava.api.model.ContainerNetwork;
+import com.github.dockerjava.api.model.NetworkSettings;
 
 /**
  * This class contains the common integration test setup for all MySQL integration test.
@@ -37,9 +37,11 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
 
     private final Statement mySqlStatement;
 
-    private final MySQLContainer<?> mySqlContainer = new MySQLContainer<>(MYSQL_DOCKER_IMAGE_REFERENCE)
+    @SuppressWarnings("resource") // Will be closed in method close()
+    private final MySQLContainer mySqlContainer = new MySQLContainer(MYSQL_DOCKER_IMAGE_REFERENCE)
             .withUsername("root").withPassword("");
 
+    @SuppressWarnings("resource") // Will be closed in method close()
     private final ExasolContainer<? extends ExasolContainer<?>> exasolContainer = new ExasolContainer<>(EXASOL_VERSION)
             .withRequiredServices(ExasolService.BUCKETFS, ExasolService.UDF).withReuse(true);
 
@@ -86,7 +88,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
         }
     }
 
-    private static String buildMySqlConnectionString(final MySQLContainer<?> mySqlContainer ) {
+    private static String buildMySqlConnectionString(final MySQLContainer mySqlContainer) {
         final NetworkSettings networkSettings = mySqlContainer.getContainerInfo().getNetworkSettings();
         final String ipAddress = networkSettings.getNetworks().values().iterator().next().getIpAddress();
         return "jdbc:mysql://" + ipAddress + ":" + MYSQL_PORT + "/" + mySqlContainer.getDatabaseName();
@@ -161,7 +163,7 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
         properties.putAll(additionalProperties);
         return this.exasolFactory.createVirtualSchemaBuilder("MYSQL_VIRTUAL_SCHEMA_" + (this.virtualSchemaCounter++))
                 .adapterScript(this.adapterScript).connectionDefinition(this.connectionDefinition)
-                .properties(properties).build();
+                .addProperties(properties).build();
     }
 
     public ColumnInspector getColumnInspector(final String catalogName) {

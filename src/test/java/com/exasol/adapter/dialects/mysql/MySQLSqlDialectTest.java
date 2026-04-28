@@ -17,7 +17,6 @@ import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
 
-import com.exasol.ExaMetadata;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +27,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterProperties;
+import com.exasol.adapter.dialects.JDBCAdapterContext;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
@@ -46,7 +47,12 @@ class MySQLSqlDialectTest {
     @BeforeEach
     void beforeEach() {
         lenient().when(exaMetadataMock.getDatabaseVersion()).thenReturn(EXASOL_VERSION);
-        this.dialect = new MySQLSqlDialect(connectionFactoryMock, AdapterProperties.emptyProperties(), exaMetadataMock);
+        final JDBCAdapterContext context = JDBCAdapterContext.builder()
+                .connectionFactory(connectionFactoryMock)
+                .properties(AdapterProperties.emptyProperties())
+                .metadata(exaMetadataMock)
+                .build();
+        this.dialect = new MySQLSqlDialect(context);
     }
 
     @Test
@@ -148,7 +154,7 @@ class MySQLSqlDialectTest {
         assertThat(this.dialect.getSupportedProperties(),
                 containsInAnyOrder(CONNECTION_NAME_PROPERTY, TABLE_FILTER_PROPERTY, CATALOG_NAME_PROPERTY,
                         EXCLUDED_CAPABILITIES_PROPERTY, DEBUG_ADDRESS_PROPERTY, LOG_LEVEL_PROPERTY,
-                        DataTypeDetection.STRATEGY_PROPERTY, TableCountLimit.MAXTABLES_PROPERTY));
+                        DataTypeDetection.STRATEGY_PROPERTY, TableCountLimit.MAXTABLES_PROPERTY, "TELEMETRY"));
     }
 
     @Test

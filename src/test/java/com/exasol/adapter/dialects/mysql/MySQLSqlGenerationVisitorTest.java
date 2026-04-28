@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.exasol.ExaMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,10 +17,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.exasol.ExaMetadata;
 import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.AdapterProperties;
-import com.exasol.adapter.dialects.SqlDialect;
-import com.exasol.adapter.dialects.SqlDialectFactory;
+import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.dialects.rewriting.SqlGenerationContext;
 import com.exasol.adapter.jdbc.ConnectionFactory;
 import com.exasol.adapter.sql.*;
@@ -37,8 +36,12 @@ class MySQLSqlGenerationVisitorTest {
     void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) {
         lenient().when(exaMetadataMock.getDatabaseVersion()).thenReturn(EXASOL_VERSION);
         final SqlDialectFactory dialectFactory = new MySQLSqlDialectFactory();
-        final SqlDialect dialect = dialectFactory.createSqlDialect(connectionFactoryMock,
-                AdapterProperties.emptyProperties(), exaMetadataMock);
+        final JDBCAdapterContext adapterContext = JDBCAdapterContext.builder()
+                .connectionFactory(connectionFactoryMock)
+                .properties(AdapterProperties.emptyProperties())
+                .metadata(exaMetadataMock)
+                .build();
+        final SqlDialect dialect = dialectFactory.createSqlDialect(adapterContext);
         final SqlGenerationContext context = new SqlGenerationContext("test_catalog", "test_schema", false);
         this.visitor = new MySQLSqlGenerationVisitor(dialect, context);
     }
