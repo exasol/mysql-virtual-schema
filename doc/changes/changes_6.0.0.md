@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 6.0.0, released 2026-04-??
+# Virtual Schema for MySQL 6.0.0, released 2026-04-29
 
 Code name: Anonymous telemetry
 
