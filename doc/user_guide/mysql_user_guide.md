@@ -2,6 +2,12 @@
 
 [MySQL](https://www.mysql.com/) is an open-source relational database management system.
 
+## Telemetry
+
+This virtual schema uses `telemetry-java` to send anonymous feature-usage events.
+
+For details on what is collected and how to disable telemetry, see the [documentation](https://github.com/exasol/telemetry-java/blob/main/doc/app-user-guide.md).
+
 ## Uploading the JDBC Driver to Exasol BucketFS
 
 1. Download the [MySQL JDBC driver](https://dev.mysql.com/downloads/connector/j/). Select Operating System -> Platform Independent -> Download.
@@ -43,7 +49,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 --/
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/bfsdefault/default/virtual-schema-dist-13.0.0-mysql-5.1.1.jar;
+    %jar /buckets/bfsdefault/default/virtual-schema-dist-14.0.1-mysql-6.0.0.jar;
     %jar /buckets/bfsdefault/default/mysql-connector-java-<version>.jar;
 /
 ;

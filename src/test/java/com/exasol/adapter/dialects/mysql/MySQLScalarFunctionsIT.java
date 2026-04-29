@@ -1,6 +1,5 @@
 package com.exasol.adapter.dialects.mysql;
 
-import java.io.IOException;
 import java.sql.*;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -24,11 +23,13 @@ public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
     private static final MySQLVirtualSchemaIntegrationTestSetup SETUP = new MySQLVirtualSchemaIntegrationTestSetup();
 
     @Override
-    protected void beforeAllSetup() throws SQLException {
+    protected void beforeAllSetup() {
+        // Nothing to do
     }
 
     @Override
-    protected void afterAllTeardown() throws SQLException {
+    protected void afterAllTeardown() {
+        // Nothing to do
     }
 
     @BeforeAll
@@ -37,7 +38,7 @@ public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
     }
 
     @AfterAll
-    static void afterAll() throws IOException {
+    static void afterAll() {
         SETUP.close();
     }
 
@@ -113,18 +114,18 @@ public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
         @Override
         public String getExternalTypeFor(final DataType exasolType) {
             switch (exasolType.getExaDataType()) {
-            case VARCHAR:
-                return "VARCHAR(" + exasolType.getSize() + ")";
-            case DOUBLE:
-                return "DOUBLE PRECISION";
-            case DECIMAL:
-                if (exasolType.getScale() == 0) {
-                    return "INTEGER";
-                } else {
+                case VARCHAR:
+                    return "VARCHAR(" + exasolType.getSize() + ")";
+                case DOUBLE:
+                    return "DOUBLE PRECISION";
+                case DECIMAL:
+                    if (exasolType.getScale() == 0) {
+                        return "INTEGER";
+                    } else {
+                        return exasolType.toString();
+                    }
+                default:
                     return exasolType.toString();
-                }
-            default:
-                return exasolType.toString();
             }
         }
 

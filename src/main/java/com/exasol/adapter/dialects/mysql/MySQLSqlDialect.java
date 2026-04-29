@@ -12,14 +12,13 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import com.exasol.ExaMetadata;
-import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.capabilities.Capabilities;
 import com.exasol.adapter.capabilities.ScalarFunctionCapability;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.dialects.rewriting.ImportIntoTemporaryTableQueryRewriter;
 import com.exasol.adapter.dialects.rewriting.SqlGenerationContext;
-import com.exasol.adapter.jdbc.*;
+import com.exasol.adapter.jdbc.RemoteMetadataReader;
+import com.exasol.adapter.jdbc.RemoteMetadataReaderException;
 import com.exasol.errorreporting.ExaError;
 
 /**
@@ -45,12 +44,10 @@ public class MySQLSqlDialect extends AbstractSqlDialect {
     /**
      * Create a new instance of the {@link MySQLSqlDialect}.
      *
-     * @param connectionFactory factory for the JDBC connection to the Athena service
-     * @param properties        user-defined adapter properties
+     * @param context adapter context
      */
-    public MySQLSqlDialect(final ConnectionFactory connectionFactory, final AdapterProperties properties,
-                final ExaMetadata exaMetadata) {
-        super(connectionFactory, properties, exaMetadata, Set.of(CATALOG_NAME_PROPERTY));
+    public MySQLSqlDialect(final JDBCAdapterContext context) {
+        super(context, Set.of(CATALOG_NAME_PROPERTY));
     }
 
     private static Capabilities createCapabilityList() {

@@ -24,10 +24,6 @@ import com.exasol.dbbuilder.dialects.exasol.VirtualSchema;
 import com.exasol.dbbuilder.dialects.mysql.MySqlSchema;
 import com.exasol.matcher.TypeMatchMode;
 
-/**
- * How to run `MySqlSqlDialectIT`: See the documentation <a
- * href="doc/development/developing-sql-dialect/integration_testing_with_containers.md>integration_testing_with_containers.md</a>.
- */
 @Tag("integration")
 @Testcontainers
 class MySQLSqlDialectIT {
@@ -172,18 +168,6 @@ class MySQLSqlDialectIT {
             return true;
         }
         if ((dockerImage.getMajor() == 8) && version.isGreaterOrEqualThan(Version.parse("8.6.0"))) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean supportTimestampPrecision() {
-        final ExasolDockerImageReference dockerImage = SETUP.getExasolContainer().getDockerImageReference();
-        if (!dockerImage.hasMajor() || !dockerImage.hasMinor() || !dockerImage.hasFix()) {
-            return false;
-        }
-        final Version version = Version.of(dockerImage.getMajor(), dockerImage.getMinor(), dockerImage.getFixVersion());
-        if ((dockerImage.getMajor() == 8) && version.isGreaterOrEqualThan(Version.parse("8.32.0"))) {
             return true;
         }
         return false;
@@ -560,7 +544,6 @@ class MySQLSqlDialectIT {
 
         @Test
         void testTimestampWithCustomPrecision() throws SQLException {
-            Assumptions.assumeTrue(supportTimestampPrecision());
             final String query = "SELECT \"timestamp_col\" FROM " + virtualSchemaJdbc + "."
                     + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
             final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP(6)"), //
@@ -569,32 +552,11 @@ class MySQLSqlDialectIT {
         }
 
         @Test
-        void testTimestampWithDefaultPrecision() throws SQLException {
-            Assumptions.assumeFalse(supportTimestampPrecision());
-            final String query = "SELECT \"timestamp_col\" FROM " + virtualSchemaJdbc + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
-                    List.of("'1970-01-01 00:00:01.123'", "'2037-01-19 03:14:07.999'", "null", "null"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
         void testTimeWithCustomPrecision() throws SQLException {
-            Assumptions.assumeTrue(supportTimestampPrecision());
             final String query = "SELECT \"time_col\" FROM " + virtualSchemaJdbc + "."
                     + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
             final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP(4)"), //
                     List.of("'1970-01-01 16:59:59.1234'", "'1970-01-01 05:34:13.9999'", "null", "null"));
-            assertThat(getActualResultSet(query), matchesResultSet(expected));
-        }
-
-        @Test
-        void testTimeWithDefaultPrecision() throws SQLException {
-            Assumptions.assumeFalse(supportTimestampPrecision());
-            final String query = "SELECT \"time_col\" FROM " + virtualSchemaJdbc + "."
-                    + MYSQL_NUMERIC_DATE_DATATYPES_TABLE;
-            final ResultSet expected = getExpectedResultSet(List.of("col1 TIMESTAMP"), //
-                    List.of("'1970-01-01 16:59:59.123'", "'1970-01-01 05:34:13.999'", "null", "null"));
             assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
