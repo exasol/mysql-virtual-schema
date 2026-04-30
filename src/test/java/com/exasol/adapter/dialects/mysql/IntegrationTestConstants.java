@@ -3,7 +3,7 @@ package com.exasol.adapter.dialects.mysql;
 import java.nio.file.Path;
 
 public final class IntegrationTestConstants {
-    public static final String VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION = "virtual-schema-dist-14.0.1-mysql-6.0.0.jar";
+    public static final String VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION = "virtual-schema-dist-14.0.2-mysql-6.0.1.jar";
     public static final String MYSQL_DOCKER_IMAGE_REFERENCE = "mysql:9.6.0";
     public static final String EXASOL_VERSION = "2025.2.1";
 

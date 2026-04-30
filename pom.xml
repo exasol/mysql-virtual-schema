@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>mysql-virtual-schema</artifactId>
-    <version>6.0.0</version>
+    <version>6.0.1</version>
     <name>Virtual Schema for MySQL</name>
     <description>Virtual Schema for MySQL</description>
     <url>https://github.com/exasol/mysql-virtual-schema/</url>
     <properties>
-        <vscjdbc.version>14.0.1</vscjdbc.version>
+        <vscjdbc.version>14.0.2</vscjdbc.version>
         <org.testcontainers.version>2.0.5</org.testcontainers.version>
     </properties>
     <dependencies>
@@ -141,7 +141,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>5.5.1</version>
+                <version>5.5.2</version>
                 <executions>
                     <execution>
                         <goals>
@@ -172,7 +172,7 @@
     <parent>
         <artifactId>mysql-virtual-schema-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>6.0.0</version>
+        <version>6.0.1</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
