@@ -49,7 +49,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 --/
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/bfsdefault/default/virtual-schema-dist-14.0.2-mysql-6.0.2.jar;
+    %jar /buckets/bfsdefault/default/virtual-schema-dist-14.0.4-mysql-6.0.2.jar;
     %jar /buckets/bfsdefault/default/mysql-connector-java-<version>.jar;
 /
 ;
@@ -120,7 +120,7 @@ See also [Adapter Properties for JDBC-Based Virtual Schemas](https://github.com/
 | YEAR            |  ✓        | DATE                      |                                                                |
 
 (1) Types TIME, DATETIME and TIMESTAMP with fractional second precision are mapped to TIMESTAMP with milliseconds precision
-for Exasol versions up to 8.31. Starting with Exasol 8.32 they are mapped with the same specified precision as in MySQL. 
+for Exasol versions up to 8.31. Starting with Exasol 8.32 they are mapped with the same specified precision as in MySQL.
 
 * The tested versions of MySQL Connector JDBC Driver return the column's size depending on the charset and its collation.
 As the real data in a MySQL table can sometimes exceed the size that we get from the JDBC driver, we set the size for all TEXT columns to 65535 characters.
@@ -136,4 +136,5 @@ In the following matrix you find combinations of JDBC driver and dialect version
 | 4.1.3                  | MySQL 8.0.23  | MySQL Connector | 8.0.23         |
 | 5.0.1                  | MySQL 8.1.0   | MySQL Connector | 8.1.0          |
 | 5.0.2                  | MySQL 9.0.1   | MySQL Connector | 9.0.1          |
-| Latest                 | MySQL 9.2.0   | MySQL Connector | 9.3.0          |
+| 5.1.0                  | MySQL 9.2.0   | MySQL Connector | 9.3.0          |
+| 6.0.2                  | MySQL 9.7.2   | MySQL Connector | 9.6.0          |
