@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>mysql-virtual-schema</artifactId>
-    <version>6.0.2</version>
+    <version>6.0.3</version>
     <name>Virtual Schema for MySQL</name>
     <description>Virtual Schema for MySQL</description>
     <url>https://github.com/exasol/mysql-virtual-schema/</url>
     <properties>
-        <vscjdbc.version>14.0.4</vscjdbc.version>
+        <vscjdbc.version>14.0.5</vscjdbc.version>
         <org.testcontainers.version>2.0.5</org.testcontainers.version>
     </properties>
     <dependencies>
@@ -66,7 +66,7 @@
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
-            <!-- Downgrade because version 9.7.0 contains CVE-2026-60586, CVE-2026-60623, CVE-2026-60624, CVE-2026-61082 -->
+            <!-- Keep 9.6.0: version 9.7.0 contains CVE-2026-60586, CVE-2026-60623, CVE-2026-60624, and CVE-2026-61082. -->
             <version>9.6.0</version>
             <scope>test</scope>
         </dependency>
@@ -85,7 +85,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>virtual-schema-shared-integration-tests</artifactId>
-            <version>3.0.2</version>
+            <version>3.0.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -173,7 +173,7 @@
     <parent>
         <artifactId>mysql-virtual-schema-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>6.0.2</version>
+        <version>6.0.3</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
