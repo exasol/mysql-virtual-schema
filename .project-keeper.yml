@@ -6,11 +6,12 @@ sources:
       - udf_coverage
       - jar_artifact
 build:
-  runnerOs: ubuntu-24.04
+  runnerOs: ubuntu-26.04
   freeDiskSpace: false
   exasolDbVersions:
-   - "2025.2.1"
-   - "2025.1.10"
+   - "2026.1.2"
+   - "2025.1.16"
+   - "8.29.13"
   workflows:
     - name: ci-build.yml
       stepCustomizations:
