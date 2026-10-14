@@ -4,6 +4,8 @@ Code name:
 
 ## Summary
 
+Added support for the `ADD_DAYS`, `ADD_HOURS`, `ADD_MINUTES`, `ADD_MONTHS`, `ADD_SECONDS`, `ADD_WEEKS`, and `ADD_YEARS` scalar functions with DATE or TIMESTAMP values and integer offsets.
+
 ## Features
 
 * ISSUE_NUMBER: description

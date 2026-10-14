@@ -65,4 +65,13 @@ class MySQLSqlGenerationVisitorTest {
                 arguments);
         assertThat(this.visitor.visit(sqlFunctionScalar), equalTo("10 " + expectedOperator + " 1"));
     }
+
+    @ParameterizedTest
+    @CsvSource({ "ADD_DAYS, DAY", "ADD_HOURS, HOUR", "ADD_MINUTES, MINUTE", "ADD_MONTHS, MONTH",
+            "ADD_SECONDS, SECOND", "ADD_WEEKS, WEEK", "ADD_YEARS, YEAR" })
+    void testRewriteDateAddFunctions(final ScalarFunction function, final String unit) throws AdapterException {
+        final SqlFunctionScalar scalarFunction = new SqlFunctionScalar(function,
+                List.of(new SqlLiteralString("2024-01-31"), new SqlLiteralExactnumeric(BigDecimal.TEN)));
+        assertThat(this.visitor.visit(scalarFunction), equalTo("DATE_ADD('2024-01-31', INTERVAL 10 " + unit + ")"));
+    }
 }
