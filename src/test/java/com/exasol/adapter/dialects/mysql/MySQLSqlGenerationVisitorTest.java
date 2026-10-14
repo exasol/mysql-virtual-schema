@@ -23,6 +23,8 @@ import com.exasol.adapter.AdapterProperties;
 import com.exasol.adapter.dialects.*;
 import com.exasol.adapter.dialects.rewriting.SqlGenerationContext;
 import com.exasol.adapter.jdbc.ConnectionFactory;
+import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.metadata.DataType.ExaCharset;
 import com.exasol.adapter.sql.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -73,5 +75,32 @@ class MySQLSqlGenerationVisitorTest {
         final SqlFunctionScalar scalarFunction = new SqlFunctionScalar(function,
                 List.of(new SqlLiteralString("2024-01-31"), new SqlLiteralExactnumeric(BigDecimal.TEN)));
         assertThat(this.visitor.visit(scalarFunction), equalTo("DATE_ADD('2024-01-31', INTERVAL 10 " + unit + ")"));
+    }
+
+    @Test
+    void testRewriteSystimestamp() throws AdapterException {
+        assertThat(this.visitor.visit(new SqlFunctionScalar(ScalarFunction.SYSTIMESTAMP, List.of())),
+                equalTo("CURRENT_TIMESTAMP"));
+    }
+
+    @Test
+    void testRewriteWeekWithIsoMode() throws AdapterException {
+        final SqlFunctionScalar scalarFunction = new SqlFunctionScalar(ScalarFunction.WEEK,
+                List.of(new SqlLiteralString("2024-01-01")));
+        assertThat(this.visitor.visit(scalarFunction), equalTo("WEEK('2024-01-01', 3)"));
+    }
+
+    @Test
+    void testRewriteRoundForDoubleValues() throws AdapterException {
+        final SqlFunctionScalar scalarFunction = new SqlFunctionScalar(ScalarFunction.ROUND,
+                List.of(new SqlLiteralDouble(0.5)));
+        assertThat(this.visitor.visit(scalarFunction), equalTo("SIGN(5E-1) * FLOOR(ABS(5E-1) + 0.5)"));
+    }
+
+    @Test
+    void testRewriteCharacterCast() throws AdapterException {
+        final SqlFunctionScalarCast cast = new SqlFunctionScalarCast(DataType.createVarChar(254, ExaCharset.UTF8),
+                new SqlLiteralExactnumeric(BigDecimal.TEN));
+        assertThat(this.visitor.visit(cast), equalTo("CAST(10 AS CHAR(254))"));
     }
 }

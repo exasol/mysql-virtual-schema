@@ -7,6 +7,7 @@ import com.exasol.adapter.AdapterException;
 import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.dialects.rewriting.SqlGenerationContext;
 import com.exasol.adapter.dialects.rewriting.SqlGenerationVisitor;
+import com.exasol.adapter.metadata.DataType.ExaDataType;
 import com.exasol.adapter.sql.*;
 
 public class MySQLSqlGenerationVisitor extends SqlGenerationVisitor {
@@ -18,6 +19,12 @@ public class MySQLSqlGenerationVisitor extends SqlGenerationVisitor {
     public String visit(final SqlFunctionScalar function) throws AdapterException {
         if (isDateAddFunction(function.getFunction())) {
             return generateDateAdd(function);
+        } else if (function.getFunction() == ScalarFunction.SYSTIMESTAMP) {
+            return "CURRENT_TIMESTAMP";
+        } else if (function.getFunction() == ScalarFunction.WEEK) {
+            return generateWeek(function);
+        } else if (function.getFunction() == ScalarFunction.ROUND && function.getArguments().size() == 1) {
+            return generateRound(function);
         } else if (function.getFunction() == ScalarFunction.DIV) {
             return generateBinaryFunction(function, "DIV");
         } else if (function.getFunction() == ScalarFunction.BIT_LSHIFT) {
@@ -27,6 +34,16 @@ public class MySQLSqlGenerationVisitor extends SqlGenerationVisitor {
         } else {
             return super.visit(function);
         }
+    }
+
+    @Override
+    public String visit(final SqlFunctionScalarCast function) throws AdapterException {
+        final ExaDataType dataType = function.getDataType().getExaDataType();
+        if (dataType == ExaDataType.CHAR || dataType == ExaDataType.VARCHAR) {
+            return "CAST(" + function.getArgument().accept(this) + " AS CHAR(" + function.getDataType().getSize()
+                    + "))";
+        }
+        return super.visit(function);
     }
 
     private static boolean isDateAddFunction(final ScalarFunction function) {
@@ -48,6 +65,15 @@ public class MySQLSqlGenerationVisitor extends SqlGenerationVisitor {
         final List<SqlNode> arguments = function.getArguments();
         return "DATE_ADD(" + arguments.get(0).accept(this) + ", INTERVAL " + arguments.get(1).accept(this) + " "
                 + getIntervalUnit(function.getFunction()) + ")";
+    }
+
+    private String generateWeek(final SqlFunctionScalar function) throws AdapterException {
+        return "WEEK(" + function.getArguments().get(0).accept(this) + ", 3)";
+    }
+
+    private String generateRound(final SqlFunctionScalar function) throws AdapterException {
+        final String argument = function.getArguments().get(0).accept(this);
+        return "SIGN(" + argument + ") * FLOOR(ABS(" + argument + ") + 0.5)";
     }
 
     private static String getIntervalUnit(final ScalarFunction function) {
