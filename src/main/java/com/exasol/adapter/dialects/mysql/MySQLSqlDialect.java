@@ -40,11 +40,8 @@ public class MySQLSqlDialect extends AbstractSqlDialect {
             ST_SETSRID, SUB, SYS_GUID, TANH, TO_CHAR, TO_DATE, TO_DSINTERVAL, TO_NUMBER, TO_TIMESTAMP, TO_YMINTERVAL,
             TRANSLATE, TRUNC, TYPEOF, UNICODE, UNICODECHR, YEARS_BETWEEN, ZEROIFNULL,
 
-            // Inconsistent rendering of boolean and timestamp values:
-            CONCAT, INSTR, REPLACE,
-
             // Inconsistent rendering of boolean and timestamp values and position/length semantics:
-            INSERT, LPAD, RPAD, LOCATE,
+            INSERT,
 
             // Different regex syntax and semantics:
             REGEXP_INSTR, REGEXP_REPLACE, REGEXP_SUBSTR,
@@ -53,7 +50,14 @@ public class MySQLSqlDialect extends AbstractSqlDialect {
             LENGTH, OCTET_LENGTH, BIT_LENGTH, LOWER, UPPER, TRIM, LTRIM, RTRIM, REVERSE, SOUNDEX, CONCAT, REPLACE,
 
             // String rendering plus position/length coercion:
-            LEFT, RIGHT, SUBSTR, LPAD, RPAD, LOCATE, INSTR, REPEAT
+            LEFT, RIGHT, SUBSTR, LPAD, RPAD, LOCATE, INSTR, REPEAT,
+
+            // Mixed-type comparison precedence differs, not only formatting. Example: least(VARCHAR, DOUBLE, DATE) expects 0.5 in Exasol but yields 1970-01-01
+            // in MySQL.
+            LEAST, GREATEST,
+
+            // Not supported by MySQL
+            REGEXP_COUNT
 
     );
     private static final Capabilities CAPABILITIES = createCapabilityList();
