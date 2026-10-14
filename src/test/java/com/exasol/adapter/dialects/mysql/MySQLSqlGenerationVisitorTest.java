@@ -35,6 +35,7 @@ class MySQLSqlGenerationVisitorTest {
     @BeforeEach
     void beforeEach(@Mock final ConnectionFactory connectionFactoryMock) {
         lenient().when(exaMetadataMock.getDatabaseVersion()).thenReturn(EXASOL_VERSION);
+        @SuppressWarnings("resource") // Closing not necessary for mocks
         final SqlDialectFactory dialectFactory = new MySQLSqlDialectFactory();
         final JDBCAdapterContext adapterContext = JDBCAdapterContext.builder()
                 .connectionFactory(connectionFactoryMock)
