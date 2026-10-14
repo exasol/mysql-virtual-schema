@@ -5,7 +5,8 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import com.exasol.adapter.commontests.scalarfunction.ScalarFunctionsTestBase;
 import com.exasol.adapter.commontests.scalarfunction.TestSetup;
@@ -18,7 +19,6 @@ import com.exasol.dbbuilder.dialects.Table;
 import com.exasol.dbbuilder.dialects.exasol.VirtualSchema;
 import com.exasol.dbbuilder.dialects.mysql.MySqlObjectFactory;
 
-@Disabled("Currently too many errors") // TODO
 public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
     private static final MySQLVirtualSchemaIntegrationTestSetup SETUP = new MySQLVirtualSchemaIntegrationTestSetup();
 

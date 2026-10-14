@@ -38,7 +38,24 @@ public class MySQLSqlDialect extends AbstractSqlDialect {
             MINUTES_BETWEEN, MIN_SCALE, MONTHS_BETWEEN, MULT, NEG, NULLIFZERO, NUMTODSINTERVAL, NUMTOYMINTERVAL,
             POSIX_TIME, SECONDS_BETWEEN, SESSIONTIMEZONE, SESSION_PARAMETER, SINH, ST_BOUNDARY, ST_FORCE2D, ST_ISRING,
             ST_SETSRID, SUB, SYS_GUID, TANH, TO_CHAR, TO_DATE, TO_DSINTERVAL, TO_NUMBER, TO_TIMESTAMP, TO_YMINTERVAL,
-            TRANSLATE, TRUNC, TYPEOF, UNICODE, UNICODECHR, YEARS_BETWEEN, ZEROIFNULL);
+            TRANSLATE, TRUNC, TYPEOF, UNICODE, UNICODECHR, YEARS_BETWEEN, ZEROIFNULL,
+
+            // Inconsistent rendering of boolean and timestamp values:
+            CONCAT, INSTR, REPLACE,
+
+            // Inconsistent rendering of boolean and timestamp values and position/length semantics:
+            INSERT, LPAD, RPAD, LOCATE,
+
+            // Different regex syntax and semantics:
+            REGEXP_INSTR, REGEXP_REPLACE, REGEXP_SUBSTR,
+
+            // String rendering/coercion:
+            LENGTH, OCTET_LENGTH, BIT_LENGTH, LOWER, UPPER, TRIM, LTRIM, RTRIM, REVERSE, SOUNDEX, CONCAT, REPLACE,
+
+            // String rendering plus position/length coercion:
+            LEFT, RIGHT, SUBSTR, LPAD, RPAD, LOCATE, INSTR, REPEAT
+
+    );
     private static final Capabilities CAPABILITIES = createCapabilityList();
 
     /**
