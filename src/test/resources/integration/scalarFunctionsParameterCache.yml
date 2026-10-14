@@ -46,6 +46,7 @@ hours_between: [ '"DATE", "DATE"', '"DATE", "TIMESTAMP"', '"TIMESTAMP", "DATE"',
     "TIMESTAMP"' ]
 iproc: [ '' ]
 is_number: [ '"DOUBLE_PRECISION"', '"INTEGER"', '"DECIMAL18__3"', '"VARCHAR2"' ]
+last_day: ['"DATE_C5"', '"TIMESTAMP_C6"']
 ln: [ '"DOUBLE_PRECISION"', '"INTEGER"', '"DECIMAL18__3"', '"BOOLEAN"' ]
 log: [ '"DOUBLE_PRECISION"', '"INTEGER"', '"DECIMAL18__3"', '"BOOLEAN"', '"DOUBLE_PRECISION",
     "DOUBLE_PRECISION"', '"DOUBLE_PRECISION", "INTEGER"', '"DOUBLE_PRECISION", "DECIMAL18__3"',
