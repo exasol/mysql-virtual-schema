@@ -1,14 +1,34 @@
 # Virtual Schema for MySQL 6.1.0, released 2026-??-??
 
-Code name:
+Code name: Scalar Functions
 
 ## Summary
 
-Added support for the `ADD_DAYS`, `ADD_HOURS`, `ADD_MINUTES`, `ADD_MONTHS`, `ADD_SECONDS`, `ADD_WEEKS`, and `ADD_YEARS` scalar functions with DATE or TIMESTAMP values and integer offsets.
+Enabled the MySQL scalar-function integration tests and extended scalar-function compatibility. Date-add functions, standard mathematical functions, date-part functions, and several MySQL-specific result-type differences are now covered and validated.
+
+* Added support for `ADD_DAYS`, `ADD_HOURS`, `ADD_MINUTES`, `ADD_MONTHS`, `ADD_SECONDS`, `ADD_WEEKS`, and `ADD_YEARS`. These functions support DATE or TIMESTAMP values with integer offsets.
+* Fixed scalar-function translation for:
+  * `CAST` to character types, translated to MySQL `CHAR` casts;
+  * `WEEK`, translated with ISO week-numbering mode;
+  * one-argument `ROUND` on floating-point values, preserving Exasol's half-up behaviour;
+  * `YEAR`, cast to a signed integer so its result type can be mapped by the virtual schema.
+
+## Limitations
+
+* Date-add compatibility is supported only for integer offsets. Compatibility with DOUBLE, scaled DECIMAL, and BOOLEAN offsets is not guaranteed because MySQL and Exasol coerce them differently. These combinations are skipped by the integration tests.
+* Compatibility is not guaranteed for `ROUND` with a floating-point precision argument or `SPACE` with a floating-point length: MySQL truncates fractional values while Exasol rounds them. These combinations are skipped by the integration tests.
+* `USER` is not compatibility-supported because it reports the remote MySQL account rather than the querying Exasol user. It is skipped by the integration tests.
+* The following capabilities are not advertised where their semantics are incompatible:
+  * `INSERT` because boolean/timestamp rendering and position/length semantics differ;
+  * `REGEXP_INSTR`, `REGEXP_REPLACE`, and `REGEXP_SUBSTR` because regular-expression syntax and semantics differ;
+  * string functions including `CONCAT`, `REPLACE`, `LENGTH`, `LOWER`, `UPPER`, `TRIM`, `LPAD`, `RPAD`, `LOCATE`, and `INSTR` because string rendering or coercion differs;
+  * `LEAST` and `GREATEST` because mixed-type comparison precedence differs;
+  * `REGEXP_COUNT` because MySQL does not support it; and
+  * `SYSTIMESTAMP` because MySQL and Exasol test environments use different timezone configuration.
 
 ## Features
 
-* ISSUE_NUMBER: description
+* #72: Restore scalar function integration tests
 
 ## Dependency Updates
 
