@@ -6,7 +6,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
 import com.exasol.adapter.capabilities.ScalarFunctionCapability;
@@ -34,17 +33,12 @@ public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
 
     @Override
     protected void afterAllTeardown() {
-        // Nothing to do
+        SETUP.close();
     }
 
     @BeforeAll
     static void beforeAll() {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-    }
-
-    @AfterAll
-    static void afterAll() {
-        SETUP.close();
     }
 
     @Override
