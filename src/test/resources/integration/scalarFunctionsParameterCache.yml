@@ -2845,5 +2845,6 @@ upper: ['"DOUBLE_PRECISION_C0"', '"INTEGER_C1"', '"DECIMAL18__3_C2"', '"BOOLEAN_
   '"VARCHAR2_C4"', '"DATE_C5"', '"TIMESTAMP_C6"']
 user: []
 week: ['"DATE_C5"', '"TIMESTAMP_C6"']
+year: ['"DATE_C5"', '"TIMESTAMP_C6"']
 years_between: ['"DATE", "DATE"', '"DATE", "TIMESTAMP"', '"TIMESTAMP", "DATE"', '"TIMESTAMP",
     "TIMESTAMP"']

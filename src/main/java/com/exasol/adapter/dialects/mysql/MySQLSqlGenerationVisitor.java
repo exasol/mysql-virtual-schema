@@ -23,6 +23,8 @@ public class MySQLSqlGenerationVisitor extends SqlGenerationVisitor {
             return "CURRENT_TIMESTAMP";
         } else if (function.getFunction() == ScalarFunction.WEEK) {
             return generateWeek(function);
+        } else if (function.getFunction() == ScalarFunction.YEAR) {
+            return generateYear(function);
         } else if (function.getFunction() == ScalarFunction.ROUND && function.getArguments().size() == 1) {
             return generateRound(function);
         } else if (function.getFunction() == ScalarFunction.DIV) {
@@ -69,6 +71,12 @@ public class MySQLSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String generateWeek(final SqlFunctionScalar function) throws AdapterException {
         return "WEEK(" + function.getArguments().get(0).accept(this) + ", 3)";
+    }
+
+    private String generateYear(final SqlFunctionScalar function) throws AdapterException {
+        // MySQL reports YEAR() with its YEAR result type, which the ETL transformer cannot map:
+        // ETL-1202: Not implemented - Transformation for this combination of column types is not possible in this version.
+        return "CAST(YEAR(" + function.getArguments().get(0).accept(this) + ") AS SIGNED)";
     }
 
     private String generateRound(final SqlFunctionScalar function) throws AdapterException {

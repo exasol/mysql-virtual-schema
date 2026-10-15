@@ -91,6 +91,13 @@ class MySQLSqlGenerationVisitorTest {
     }
 
     @Test
+    void testRewriteYearAsSignedInteger() throws AdapterException {
+        final SqlFunctionScalar scalarFunction = new SqlFunctionScalar(ScalarFunction.YEAR,
+                List.of(new SqlLiteralString("2024-01-01")));
+        assertThat(this.visitor.visit(scalarFunction), equalTo("CAST(YEAR('2024-01-01') AS SIGNED)"));
+    }
+
+    @Test
     void testRewriteRoundForDoubleValues() throws AdapterException {
         final SqlFunctionScalar scalarFunction = new SqlFunctionScalar(ScalarFunction.ROUND,
                 List.of(new SqlLiteralDouble(0.5)));
