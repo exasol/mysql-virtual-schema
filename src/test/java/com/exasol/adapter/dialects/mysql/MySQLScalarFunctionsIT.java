@@ -4,16 +4,21 @@ import java.sql.*;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
+import com.exasol.adapter.capabilities.ScalarFunctionCapability;
 import com.exasol.adapter.commontests.scalarfunction.ScalarFunctionsTestBase;
 import com.exasol.adapter.commontests.scalarfunction.TestSetup;
 import com.exasol.adapter.commontests.scalarfunction.virtualschematestsetup.*;
 import com.exasol.adapter.commontests.scalarfunction.virtualschematestsetup.request.Column;
 import com.exasol.adapter.commontests.scalarfunction.virtualschematestsetup.request.TableRequest;
+import com.exasol.adapter.dialects.JDBCAdapterContext;
+import com.exasol.adapter.dialects.SqlDialect;
 import com.exasol.adapter.metadata.DataType;
+import com.exasol.adapter.sql.ScalarFunction;
 import com.exasol.dbbuilder.dialects.Schema;
 import com.exasol.dbbuilder.dialects.Table;
 import com.exasol.dbbuilder.dialects.exasol.VirtualSchema;
@@ -149,7 +154,22 @@ public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
             excludes.add("round(\"DOUBLE_PRECISION_C0\", \"DOUBLE_PRECISION_C0\")");
             // USER() describes the remote MySQL account, not the querying Exasol user.
             excludes.add("user()");
+            excludes.addAll(getDialectExcludes());
             return excludes;
+        }
+
+        /**
+         * Returns a collection of SQL functions that are excluded by the MySQL dialect.
+         * This is a workaround for https://github.com/exasol/virtual-schema-shared-integration-tests/issues/55
+         */
+        private Collection<String> getDialectExcludes() {
+            try (SqlDialect dialect = new MySQLSqlDialect(JDBCAdapterContext.builder().build())) {
+                final Set<ScalarFunctionCapability> enabledCapabilties = dialect.getCapabilities().getScalarFunctionCapabilities();
+                final Set<ScalarFunctionCapability> allCapabilties = Set.of(ScalarFunctionCapability.values());
+                final Set<ScalarFunctionCapability> excludedCapabilities = allCapabilties.stream()
+                        .filter(capability -> !enabledCapabilties.contains(capability)).collect(Collectors.toSet());
+                return excludedCapabilities.stream().map(ScalarFunctionCapability::getFunction).map(ScalarFunction::name).collect(Collectors.toSet());
+            }
         }
 
         @Override

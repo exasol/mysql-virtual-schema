@@ -57,7 +57,10 @@ public class MySQLSqlDialect extends AbstractSqlDialect {
             LEAST, GREATEST,
 
             // Not supported by MySQL
-            REGEXP_COUNT
+            REGEXP_COUNT,
+
+            // Timezone configuration is different
+            SYSTIMESTAMP
 
     );
     private static final Capabilities CAPABILITIES = createCapabilityList();
