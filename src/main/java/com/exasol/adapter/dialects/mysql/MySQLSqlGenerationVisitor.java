@@ -10,6 +10,7 @@ import com.exasol.adapter.dialects.rewriting.SqlGenerationContext;
 import com.exasol.adapter.dialects.rewriting.SqlGenerationVisitor;
 import com.exasol.adapter.metadata.DataType.ExaDataType;
 import com.exasol.adapter.sql.*;
+import com.exasol.errorreporting.ExaError;
 
 public class MySQLSqlGenerationVisitor extends SqlGenerationVisitor {
     public MySQLSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
@@ -102,7 +103,9 @@ public class MySQLSqlGenerationVisitor extends SqlGenerationVisitor {
             case ADD_YEARS:
                 return "YEAR";
             default:
-                throw new IllegalArgumentException("Unsupported date-add function: " + function);
+                throw new IllegalArgumentException(ExaError.messageBuilder("E-VSMYSQL-57")
+                        .message("Unsupported date-add function: {{function}}", function)
+                        .ticketMitigation().toString());
         }
     }
 
