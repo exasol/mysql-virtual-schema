@@ -707,9 +707,9 @@ class MySQLSqlDialectIT {
                     + virtualSchemaJdbc + "." + TABLE_JOIN_2
                     + " b ON a.\"x\"||a.\"y\"=b.\"x\"||b.\"y\" ORDER BY a.\"x\"";
             final ResultSet expected = getExpectedResultSet(
-                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
-                    List.of("null, null, 3, 'ccc'", //
-                            "2, 'bbb', 2, 'bbb'"));
+                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"),
+                    List.of("2, 'bbb', 2, 'bbb'",
+                            "null, null, 3, 'ccc'"));
             assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
