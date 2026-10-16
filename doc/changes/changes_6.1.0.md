@@ -17,7 +17,7 @@ Enabled the MySQL scalar-function integration tests and extended scalar-function
 
 * Date-add compatibility is supported only for integer offsets. Compatibility with `DOUBLE`, `DECIMAL`, and `BOOLEAN` offsets is not guaranteed because MySQL and Exasol coerce them differently. These combinations are skipped by the integration tests.
 * Compatibility is not guaranteed for `ROUND` with a floating-point precision argument or `SPACE` with a floating-point length: MySQL truncates fractional values while Exasol rounds them. These combinations are skipped by the integration tests.
-* `USER` is not compatibility-supported because it reports the remote MySQL account rather than the querying Exasol user. It is skipped by the integration tests.
+* `USER` is not supported because it reports the remote MySQL account rather than the querying Exasol user.
 * The following capabilities are not supported where their semantics are incompatible:
   * `INSERT` because boolean/timestamp rendering and position/length semantics differ;
   * `REGEXP_INSTR`, `REGEXP_REPLACE`, and `REGEXP_SUBSTR` because regular-expression syntax and semantics differ;

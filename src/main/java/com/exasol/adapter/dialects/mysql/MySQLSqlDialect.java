@@ -40,6 +40,9 @@ public class MySQLSqlDialect extends AbstractSqlDialect {
             ST_SETSRID, SUB, SYS_GUID, TANH, TO_CHAR, TO_DATE, TO_DSINTERVAL, TO_NUMBER, TO_TIMESTAMP, TO_YMINTERVAL,
             TRANSLATE, TRUNC, TYPEOF, UNICODE, UNICODECHR, YEARS_BETWEEN, ZEROIFNULL,
 
+            // USER() describes the remote MySQL account, not the querying Exasol user.
+            CURRENT_USER,
+
             // Inconsistent rendering of boolean and timestamp values and position/length semantics:
             INSERT,
 

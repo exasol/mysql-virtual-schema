@@ -21,8 +21,6 @@ public class MySQLSqlGenerationVisitor extends SqlGenerationVisitor {
     public String visit(final SqlFunctionScalar function) throws AdapterException {
         if (isDateAddFunction(function.getFunction())) {
             return generateDateAdd(function);
-        } else if (function.getFunction() == ScalarFunction.SYSTIMESTAMP) {
-            return "CURRENT_TIMESTAMP";
         } else if (function.getFunction() == ScalarFunction.WEEK) {
             return generateWeek(function);
         } else if (function.getFunction() == ScalarFunction.YEAR) {

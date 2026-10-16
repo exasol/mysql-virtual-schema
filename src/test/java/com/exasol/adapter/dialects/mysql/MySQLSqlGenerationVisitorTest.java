@@ -78,12 +78,6 @@ class MySQLSqlGenerationVisitorTest {
     }
 
     @Test
-    void testRewriteSystimestamp() throws AdapterException {
-        assertThat(this.visitor.visit(new SqlFunctionScalar(ScalarFunction.SYSTIMESTAMP, List.of())),
-                equalTo("CURRENT_TIMESTAMP"));
-    }
-
-    @Test
     void testRewriteWeekWithIsoMode() throws AdapterException {
         final SqlFunctionScalar scalarFunction = new SqlFunctionScalar(ScalarFunction.WEEK,
                 List.of(new SqlLiteralString("2024-01-01")));

@@ -146,8 +146,6 @@ public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
             // MySQL truncates fractional SPACE lengths and ROUND precisions, whereas Exasol rounds them.
             excludes.add("space(\"DOUBLE_PRECISION_C0\")");
             excludes.add("round(\"DOUBLE_PRECISION_C0\", \"DOUBLE_PRECISION_C0\")");
-            // USER() describes the remote MySQL account, not the querying Exasol user.
-            excludes.add("user()");
             excludes.addAll(getDialectExcludes());
             return excludes;
         }
