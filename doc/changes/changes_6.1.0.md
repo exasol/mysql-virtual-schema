@@ -26,6 +26,8 @@ Enabled the MySQL scalar-function integration tests and extended scalar-function
   * `REGEXP_COUNT` because MySQL does not support it; and
   * `SYSTIMESTAMP` because MySQL and Exasol test environments use different timezone configuration.
 
+**Breaking Change:** Exasol version 8 is no longer covered by integration tests due to issues with timestamps with timezone.
+
 ## Features
 
 * #72: Restore scalar function integration tests
