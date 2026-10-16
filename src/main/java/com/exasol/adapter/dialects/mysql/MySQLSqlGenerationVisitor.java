@@ -1,6 +1,7 @@
 package com.exasol.adapter.dialects.mysql;
 
-import java.util.ArrayList;
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
 
 import com.exasol.adapter.AdapterException;
@@ -107,11 +108,18 @@ public class MySQLSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String generateBinaryFunction(final SqlFunctionScalar function, final String operator)
             throws AdapterException {
-        final List<SqlNode> arguments = function.getArguments();
-        final List<String> argumentsSql = new ArrayList<>(arguments.size());
-        for (final SqlNode node : arguments) {
-            argumentsSql.add(node.accept(this));
-        }
+        final List<String> argumentsSql = function.getArguments()
+                .stream()
+                .map(this::acceptNode)
+                .collect(toList());
         return argumentsSql.get(0) + " " + operator + " " + argumentsSql.get(1);
+    }
+
+    private String acceptNode(final SqlNode node) {
+        try {
+            return node.accept(this);
+        } catch (final AdapterException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }
