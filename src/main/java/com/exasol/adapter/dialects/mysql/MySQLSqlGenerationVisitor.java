@@ -109,8 +109,7 @@ public class MySQLSqlGenerationVisitor extends SqlGenerationVisitor {
         }
     }
 
-    private String generateBinaryFunction(final SqlFunctionScalar function, final String operator)
-            throws AdapterException {
+    private String generateBinaryFunction(final SqlFunctionScalar function, final String operator) {
         final List<String> argumentsSql = function.getArguments()
                 .stream()
                 .map(this::acceptNode)
