@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.sql.*;
+import java.sql.Date;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -225,6 +226,17 @@ class MySQLSqlDialectIT {
                         "50, true, 'abc'", //
                         "100, false, 'a'"));
         assertThat(actualResultSet, matchesResultSet(expected));
+    }
+
+    @Test
+    void testAddMonthsPreservesLastDayOfMonth() throws SQLException {
+        try (final MySqlSchema mySqlSchema = SETUP.getMySqlObjectFactory().createSchema("LAST_DAY_DATE_ADD_SCHEMA");
+                final Table table = mySqlSchema.createTable("LAST_DAY_DATE_ADD_TABLE", List.of("input_date"), List.of("DATE")).insert("2024-02-29");
+                final VirtualSchema lastDayVirtualSchema = SETUP.createVirtualSchema(Collections.emptyMap(), mySqlSchema.getName());
+                final ResultSet actualResultSet = getActualResultSet(
+                        "SELECT ADD_MONTHS(\"input_date\", 1) FROM " + lastDayVirtualSchema.getName() + "." + table.getName())) {
+            assertThat(actualResultSet, table("DATE").row(Date.valueOf("2024-03-31")).matches());
+        }
     }
 
     @Test
@@ -707,9 +719,9 @@ class MySQLSqlDialectIT {
                     + virtualSchemaJdbc + "." + TABLE_JOIN_2
                     + " b ON a.\"x\"||a.\"y\"=b.\"x\"||b.\"y\" ORDER BY a.\"x\"";
             final ResultSet expected = getExpectedResultSet(
-                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"), //
-                    List.of("null, null, 3, 'ccc'", //
-                            "2, 'bbb', 2, 'bbb'"));
+                    List.of("x INT", "y VARCHAR(100)", "a INT", "b VARCHAR(100)"),
+                    List.of("2, 'bbb', 2, 'bbb'",
+                            "null, null, 3, 'ccc'"));
             assertThat(getActualResultSet(query), matchesResultSet(expected));
         }
 
