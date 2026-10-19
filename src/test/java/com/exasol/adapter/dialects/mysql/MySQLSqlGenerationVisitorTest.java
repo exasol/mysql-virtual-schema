@@ -69,12 +69,32 @@ class MySQLSqlGenerationVisitorTest {
     }
 
     @ParameterizedTest
-    @CsvSource({ "ADD_DAYS, DAY", "ADD_HOURS, HOUR", "ADD_MINUTES, MINUTE", "ADD_MONTHS, MONTH",
-            "ADD_SECONDS, SECOND", "ADD_WEEKS, WEEK", "ADD_YEARS, YEAR" })
+    @CsvSource({ "ADD_DAYS, DAY", "ADD_HOURS, HOUR", "ADD_MINUTES, MINUTE", "ADD_SECONDS, SECOND",
+            "ADD_WEEKS, WEEK", "ADD_YEARS, YEAR" })
     void testRewriteDateAddFunctions(final ScalarFunction function, final String unit) throws AdapterException {
         final SqlFunctionScalar scalarFunction = new SqlFunctionScalar(function,
                 List.of(new SqlLiteralString("2024-01-31"), new SqlLiteralExactnumeric(BigDecimal.TEN)));
-        assertThat(this.visitor.visit(scalarFunction), equalTo("DATE_ADD('2024-01-31', INTERVAL 10 " + unit + ")"));
+        assertThat(this.visitor.visit(scalarFunction), equalTo("DATE_ADD('2024-01-31', INTERVAL "
+                + "(SIGN(10) * FLOOR(ABS(10) + 0.5)) " + unit + ")"));
+    }
+
+    @Test
+    void testRoundsDateAddOffset() throws AdapterException {
+        final SqlFunctionScalar scalarFunction = new SqlFunctionScalar(ScalarFunction.ADD_HOURS,
+                List.of(new SqlLiteralString("2024-01-31"), new SqlLiteralDouble(-1.5)));
+        assertThat(this.visitor.visit(scalarFunction), equalTo("DATE_ADD('2024-01-31', INTERVAL "
+                + "(SIGN(-1.5E0) * FLOOR(ABS(-1.5E0) + 0.5)) HOUR)"));
+    }
+
+    @Test
+    void testRewriteAddMonthsPreservingLastDayOfMonth() throws AdapterException {
+        final SqlFunctionScalar scalarFunction = new SqlFunctionScalar(ScalarFunction.ADD_MONTHS,
+                List.of(new SqlLiteralString("2024-02-29"), new SqlLiteralExactnumeric(BigDecimal.ONE)));
+        final String dateAdd = "DATE_ADD('2024-02-29', INTERVAL (SIGN(1) * FLOOR(ABS(1) + 0.5)) MONTH)";
+        final String expectedSql = "CASE WHEN DATE('2024-02-29') = LAST_DAY('2024-02-29') THEN DATE_ADD(" + dateAdd
+                + ", INTERVAL (DAY(LAST_DAY(" + dateAdd + ")) - DAY(" + dateAdd + ")) DAY) ELSE " + dateAdd
+                + " END";
+        assertThat(this.visitor.visit(scalarFunction), equalTo(expectedSql));
     }
 
     @Test

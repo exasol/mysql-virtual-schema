@@ -134,8 +134,7 @@ public class MySQLScalarFunctionsIT extends ScalarFunctionsTestBase {
             final List<String> dateAddFunctions = List.of("add_days", "add_hours", "add_minutes", "add_months",
                     "add_seconds", "add_weeks", "add_years");
             final List<String> temporalColumns = List.of("DATE_C5", "TIMESTAMP_C6");
-            final List<String> unsupportedOffsetColumns = List.of("DOUBLE_PRECISION_C0", "DECIMAL18__3_C2",
-                    "BOOLEAN_C3");
+            final List<String> unsupportedOffsetColumns = List.of("BOOLEAN_C3");
             for (final String function : dateAddFunctions) {
                 for (final String temporalColumn : temporalColumns) {
                     for (final String offsetColumn : unsupportedOffsetColumns) {

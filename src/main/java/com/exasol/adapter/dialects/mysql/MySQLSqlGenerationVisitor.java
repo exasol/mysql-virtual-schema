@@ -65,8 +65,24 @@ public class MySQLSqlGenerationVisitor extends SqlGenerationVisitor {
 
     private String generateDateAdd(final SqlFunctionScalar function) throws AdapterException {
         final List<SqlNode> arguments = function.getArguments();
-        return "DATE_ADD(" + arguments.get(0).accept(this) + ", INTERVAL " + arguments.get(1).accept(this) + " "
-                + getIntervalUnit(function.getFunction()) + ")";
+        final String date = arguments.get(0).accept(this);
+        final String interval = "INTERVAL (" + roundDateAddOffset(arguments.get(1).accept(this)) + ") "
+                + getIntervalUnit(function.getFunction());
+        final String dateAdd = "DATE_ADD(" + date + ", " + interval + ")";
+        if (function.getFunction() == ScalarFunction.ADD_MONTHS) {
+            return generateAddMonths(date, interval, dateAdd);
+        }
+        return dateAdd;
+    }
+
+    private String generateAddMonths(final String date, final String interval, final String dateAdd) {
+        final String lastDayAdjustment = "DAY(LAST_DAY(" + dateAdd + ")) - DAY(" + dateAdd + ")";
+        return "CASE WHEN DATE(" + date + ") = LAST_DAY(" + date + ") THEN DATE_ADD(" + dateAdd + ", INTERVAL ("
+                + lastDayAdjustment + ") DAY) ELSE " + dateAdd + " END";
+    }
+
+    private String roundDateAddOffset(final String offset) {
+        return "SIGN(" + offset + ") * FLOOR(ABS(" + offset + ") + 0.5)";
     }
 
     private String generateWeek(final SqlFunctionScalar function) throws AdapterException {

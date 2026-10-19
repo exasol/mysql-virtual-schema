@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.sql.*;
+import java.sql.Date;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -225,6 +226,17 @@ class MySQLSqlDialectIT {
                         "50, true, 'abc'", //
                         "100, false, 'a'"));
         assertThat(actualResultSet, matchesResultSet(expected));
+    }
+
+    @Test
+    void testAddMonthsPreservesLastDayOfMonth() throws SQLException {
+        try (final MySqlSchema mySqlSchema = SETUP.getMySqlObjectFactory().createSchema("LAST_DAY_DATE_ADD_SCHEMA");
+                final Table table = mySqlSchema.createTable("LAST_DAY_DATE_ADD_TABLE", List.of("input_date"), List.of("DATE")).insert("2024-02-29");
+                final VirtualSchema lastDayVirtualSchema = SETUP.createVirtualSchema(Collections.emptyMap(), mySqlSchema.getName());
+                final ResultSet actualResultSet = getActualResultSet(
+                        "SELECT ADD_MONTHS(\"input_date\", 1) FROM " + lastDayVirtualSchema.getName() + ".LAST_DAY_DATE_ADD_TABLE")) {
+            assertThat(actualResultSet, table("DATE").row(Date.valueOf("2024-03-31")).matches());
+        }
     }
 
     @Test
