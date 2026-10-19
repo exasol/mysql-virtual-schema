@@ -234,7 +234,7 @@ class MySQLSqlDialectIT {
                 final Table table = mySqlSchema.createTable("LAST_DAY_DATE_ADD_TABLE", List.of("input_date"), List.of("DATE")).insert("2024-02-29");
                 final VirtualSchema lastDayVirtualSchema = SETUP.createVirtualSchema(Collections.emptyMap(), mySqlSchema.getName());
                 final ResultSet actualResultSet = getActualResultSet(
-                        "SELECT ADD_MONTHS(\"input_date\", 1) FROM " + lastDayVirtualSchema.getName() + ".LAST_DAY_DATE_ADD_TABLE")) {
+                        "SELECT ADD_MONTHS(\"input_date\", 1) FROM " + lastDayVirtualSchema.getName() + "." + table.getName())) {
             assertThat(actualResultSet, table("DATE").row(Date.valueOf("2024-03-31")).matches());
         }
     }
