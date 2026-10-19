@@ -70,12 +70,12 @@ public class MySQLSqlGenerationVisitor extends SqlGenerationVisitor {
                 + getIntervalUnit(function.getFunction());
         final String dateAdd = "DATE_ADD(" + date + ", " + interval + ")";
         if (function.getFunction() == ScalarFunction.ADD_MONTHS) {
-            return generateAddMonths(date, interval, dateAdd);
+            return generateAddMonths(date, dateAdd);
         }
         return dateAdd;
     }
 
-    private String generateAddMonths(final String date, final String interval, final String dateAdd) {
+    private String generateAddMonths(final String date, final String dateAdd) {
         final String lastDayAdjustment = "DAY(LAST_DAY(" + dateAdd + ")) - DAY(" + dateAdd + ")";
         return "CASE WHEN DATE(" + date + ") = LAST_DAY(" + date + ") THEN DATE_ADD(" + dateAdd + ", INTERVAL ("
                 + lastDayAdjustment + ") DAY) ELSE " + dateAdd + " END";
