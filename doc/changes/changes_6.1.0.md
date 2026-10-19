@@ -1,4 +1,4 @@
-# Virtual Schema for MySQL 6.1.0, released 2026-10-16
+# Virtual Schema for MySQL 6.1.0, released 2026-10-19
 
 Code name: Scalar Functions
 
