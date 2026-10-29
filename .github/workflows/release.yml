@@ -75,7 +75,7 @@ jobs:
         with:
           distribution: "temurin"
           java-version: |-
-            11
+            17
             21
           # Do not enable caching for release build to avoid cache poisoning
           # See https://docs.zizmor.sh/audits/#cache-poisoning
@@ -119,7 +119,7 @@ jobs:
         with:
           distribution: "temurin"
           java-version: |-
-            11
+            17
             21
           cache: "maven"
       - 

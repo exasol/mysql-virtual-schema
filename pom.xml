@@ -7,7 +7,8 @@
     <description>Virtual Schema for MySQL</description>
     <url>https://github.com/exasol/mysql-virtual-schema/</url>
     <properties>
-        <vscjdbc.version>14.1.0</vscjdbc.version>
+        <java.version>17</java.version>
+        <vscjdbc.version>14.1.1</vscjdbc.version>
         <org.testcontainers.version>2.0.5</org.testcontainers.version>
     </properties>
     <dependencies>
@@ -34,8 +35,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <!-- Version 6 requires Java 17 -->
-            <version>5.14.4</version>
+            <version>6.1.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -66,7 +66,7 @@
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
-            <version>26.7.0</version>
+            <version>26.10.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>udf-debugging-java</artifactId>
-            <version>0.6.21</version>
+            <version>0.6.22</version>
             <scope>test</scope>
         </dependency>
         <dependency>
