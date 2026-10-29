@@ -6,14 +6,9 @@ Code name: Fixed OW2 ASM vulnerabilities CVE-2026-110257 through CVE-2026-110270
 
 Fixed eight OW2 ASM vulnerabilities in test dependencies.
 
-- Fixes #74
-- Fixes #75
-- Fixes #76
-- Fixes #77
-- Fixes #78
-- Fixes #79
-- Fixes #80
-- Fixes #81
+## Breaking Change
+
+Starting with this release, the project requires Java 17 for building and running and does not support Exasol v8 anymore.
 
 ## Security
 
