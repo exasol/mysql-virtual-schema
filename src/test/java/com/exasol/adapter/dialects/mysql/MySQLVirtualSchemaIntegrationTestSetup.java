@@ -115,7 +115,8 @@ public class MySQLVirtualSchemaIntegrationTestSetup implements Closeable {
         try {
             bucket.uploadFile(PATH_TO_VIRTUAL_SCHEMAS_JAR, VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
         } catch (final FileNotFoundException | BucketAccessException | TimeoutException exception) {
-            throw new IllegalStateException("Failed to upload jar to bucket " + bucket, exception);
+            throw new IllegalStateException("Failed to upload jar " + PATH_TO_VIRTUAL_SCHEMAS_JAR + " to bucket " + bucket + ": " + exception.getMessage(),
+                    exception);
         }
     }
 
