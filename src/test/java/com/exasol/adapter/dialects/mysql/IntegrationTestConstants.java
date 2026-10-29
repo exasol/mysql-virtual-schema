@@ -4,7 +4,8 @@ import java.nio.file.Path;
 
 public final class IntegrationTestConstants {
     public static final String VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION = "virtual-schema-dist-14.1.1-mysql-7.0.0.jar";
-    public static final String MYSQL_DOCKER_IMAGE_REFERENCE = "mysql:9.7.2";
+    // https://hub.docker.com/_/mysql/tags
+    public static final String MYSQL_DOCKER_IMAGE_REFERENCE = "mysql:9.7.4";
     public static final String EXASOL_VERSION = "2026.1.2";
 
     public static final Path PATH_TO_VIRTUAL_SCHEMAS_JAR = Path.of("target", VIRTUAL_SCHEMAS_JAR_NAME_AND_VERSION);
