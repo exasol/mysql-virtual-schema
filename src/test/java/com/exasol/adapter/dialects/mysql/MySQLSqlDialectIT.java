@@ -393,6 +393,24 @@ class MySQLSqlDialectIT {
     }
 
     @Test
+    void testOrderByAscendingLimitWithNulls() throws SQLException {
+        final String query = "SELECT \"int_col\" FROM " + virtualSchemaJdbc + "." + MYSQL_NUMERIC_DATE_DATATYPES_TABLE + " ORDER BY \"int_col\" ASC LIMIT 2";
+        assertThat(getActualResultSet(query), table("BIGINT").row(-2147483648L).row(0L).matches());
+    }
+
+    @Test
+    void testOrderByDescendingLimitWithNullableColumn() throws SQLException {
+        final String query = "SELECT \"date_col\" FROM " + virtualSchemaJdbc + "." + MYSQL_NUMERIC_DATE_DATATYPES_TABLE + " ORDER BY \"date_col\" DESC LIMIT 2";
+        assertThat(getActualResultSet(query), table("DATE").row((Date) null).row((Date) null).matches());
+    }
+
+    @Test
+    void testOrderByAscendingLimitWithNullableColumn() throws SQLException {
+        final String query = "SELECT \"date_col\" FROM " + virtualSchemaJdbc + "." + MYSQL_NUMERIC_DATE_DATATYPES_TABLE + " ORDER BY \"date_col\" ASC LIMIT 2";
+        assertThat(getActualResultSet(query), table("DATE").row(Date.valueOf("1000-01-01")).row(Date.valueOf("9999-12-31")).matches());
+    }
+
+    @Test
     void testOrderByLimitOffset() throws SQLException {
         final String query = "SELECT \"bool_col\", \"int_col\" FROM " + virtualSchemaJdbc + "." + MYSQL_SIMPLE_TABLE
                 + " ORDER BY \"int_col\" LIMIT 2 OFFSET 1";
