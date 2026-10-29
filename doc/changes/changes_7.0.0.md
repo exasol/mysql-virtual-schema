@@ -38,7 +38,8 @@ Fixed eight OW2 ASM vulnerabilities in test dependencies.
 * Updated `com.exasol:virtual-schema-common-jdbc:14.1.0` to `14.1.1`
 * Updated `com.mysql:mysql-connector-j:26.7.0` to `26.10.0`
 * Updated `org.jacoco:org.jacoco.agent:0.8.15` to `0.8.16`
-* Updated `org.junit.jupiter:junit-jupiter-api:5.14.4` to `6.1.3`
+* Removed `org.junit.jupiter:junit-jupiter-api:5.14.4`
+* Added `org.junit.jupiter:junit-jupiter:6.1.3`
 
 ### Plugin Dependency Updates
 

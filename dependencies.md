@@ -13,7 +13,7 @@
 | ----------------------------------------------- | ---------------------------------------------------------------------- |
 | [Virtual Schema Common JDBC][0]                 | [MIT License][1]                                                       |
 | [Hamcrest][2]                                   | [BSD-3-Clause][3]                                                      |
-| [JUnit Jupiter API][4]                          | [Eclipse Public License v2.0][5]                                       |
+| [JUnit Jupiter (Aggregator)][4]                 | [Eclipse Public License v2.0][5]                                       |
 | [mockito-junit-jupiter][6]                      | [MIT][7]                                                               |
 | [Test containers for Exasol on Docker][8]       | [MIT License][9]                                                       |
 | [Testcontainers :: JUnit Jupiter Extension][10] | [MIT][11]                                                              |
