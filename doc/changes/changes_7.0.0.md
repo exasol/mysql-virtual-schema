@@ -1,10 +1,14 @@
-# Virtual Schema for MySQL 7.0.0, released 2026-??-??
+# Virtual Schema for MySQL 7.0.0, released 2026-10-29
 
 Code name: Fixed OW2 ASM vulnerabilities CVE-2026-110257 through CVE-2026-110270
 
 ## Summary
 
 Fixed eight OW2 ASM vulnerabilities in test dependencies.
+
+## Bugfixes
+
+* #83: Emulate Exasol's `NULLS FIRST` ordering in MySQL queries, fixing `ORDER BY ... DESC LIMIT` pushdown.
 
 ## Breaking Change
 

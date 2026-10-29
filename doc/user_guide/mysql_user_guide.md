@@ -138,3 +138,4 @@ In the following matrix you find combinations of JDBC driver and dialect version
 | 5.0.2                  | MySQL 9.0.1   | MySQL Connector | 9.0.1          |
 | 5.1.0                  | MySQL 9.2.0   | MySQL Connector | 9.3.0          |
 | 6.0.2                  | MySQL 9.7.2   | MySQL Connector | 9.6.0          |
+| 7.0.0                  | MySQL 9.7.4   | MySQL Connector | 26.10.0        |
