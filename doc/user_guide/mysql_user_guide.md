@@ -49,7 +49,7 @@ The SQL statement below creates the adapter script, defines the Java class that 
 --/
 CREATE OR REPLACE JAVA ADAPTER SCRIPT SCHEMA_FOR_VS_SCRIPT.ADAPTER_SCRIPT_MYSQL AS
     %scriptclass com.exasol.adapter.RequestDispatcher;
-    %jar /buckets/bfsdefault/default/virtual-schema-dist-14.1.0-mysql-6.1.0.jar;
+    %jar /buckets/bfsdefault/default/virtual-schema-dist-14.1.1-mysql-7.0.0.jar;
     %jar /buckets/bfsdefault/default/mysql-connector-java-<version>.jar;
 /
 ;
