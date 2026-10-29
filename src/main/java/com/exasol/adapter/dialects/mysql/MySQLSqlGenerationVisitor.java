@@ -2,6 +2,7 @@ package com.exasol.adapter.dialects.mysql;
 
 import static java.util.stream.Collectors.toList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.exasol.adapter.AdapterException;
@@ -15,6 +16,22 @@ import com.exasol.errorreporting.ExaError;
 public class MySQLSqlGenerationVisitor extends SqlGenerationVisitor {
     public MySQLSqlGenerationVisitor(final SqlDialect dialect, final SqlGenerationContext context) {
         super(dialect, context);
+    }
+
+    @Override
+    public String visit(final SqlOrderBy orderBy) throws AdapterException {
+        final List<String> sqlOrderElements = new ArrayList<>();
+        for (int i = 0; i < orderBy.getExpressions().size(); ++i) {
+            final String expression = orderBy.getExpressions().get(i).accept(this);
+            final boolean ascending = orderBy.isAscending().get(i);
+            final boolean nullsLast = orderBy.nullsLast().get(i);
+            final boolean mysqlNullsLast = !ascending;
+            if (nullsLast != mysqlNullsLast) {
+                sqlOrderElements.add(expression + " IS NULL " + (nullsLast ? "ASC" : "DESC"));
+            }
+            sqlOrderElements.add(expression + (ascending ? "" : " DESC"));
+        }
+        return "ORDER BY " + String.join(", ", sqlOrderElements);
     }
 
     @Override

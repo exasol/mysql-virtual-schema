@@ -388,11 +388,8 @@ class MySQLSqlDialectIT {
 
     @Test
     void testOrderByDescendingLimitWithNulls() throws SQLException {
-        final String query = "SELECT \"int_col\" FROM " + virtualSchemaJdbc + "."
-                + MYSQL_NUMERIC_DATE_DATATYPES_TABLE + " ORDER BY \"int_col\" DESC LIMIT 2";
-        final ResultSet expected = getExpectedResultSet(List.of("int_col DECIMAL(10,0)"),
-                List.of("null", "null"));
-        assertThat(getActualResultSet(query), matchesResultSet(expected));
+        final String query = "SELECT \"int_col\" FROM " + virtualSchemaJdbc + "." + MYSQL_NUMERIC_DATE_DATATYPES_TABLE + " ORDER BY \"int_col\" DESC LIMIT 2";
+        assertThat(getActualResultSet(query), table("BIGINT").row(2147483647L).row(0L).matches());
     }
 
     @Test

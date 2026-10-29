@@ -118,6 +118,34 @@ class MySQLSqlGenerationVisitorTest {
         assertThat(this.visitor.visit(scalarFunction), equalTo("SIGN(5E-1) * FLOOR(ABS(5E-1) + 0.5)"));
     }
 
+    @ParameterizedTest
+    @CsvSource({ "true, false, '1'",
+            "true, true, '1 IS NULL ASC, 1'",
+            "false, false, '1 IS NULL DESC, 1 DESC'",
+            "false, true, '1 DESC'" })
+    void testOrderByNullSorting(final boolean ascending, final boolean nullsLast, final String expectedOrderBy)
+            throws AdapterException {
+        final SqlOrderBy orderBy = new SqlOrderBy(List.of(new SqlLiteralExactnumeric(BigDecimal.ONE)),
+                List.of(ascending), List.of(nullsLast));
+        assertThat(this.visitor.visit(orderBy), equalTo("ORDER BY " + expectedOrderBy));
+    }
+
+    @Test
+    void testOrderByEmpty() throws AdapterException {
+        final SqlOrderBy orderBy = new SqlOrderBy(List.of(), List.of(), List.of());
+        assertThat(this.visitor.visit(orderBy), equalTo("ORDER BY "));
+    }
+
+    @Test
+    void testOrderByMultipleExpressions() throws AdapterException {
+        final SqlOrderBy orderBy = new SqlOrderBy(
+                List.of(new SqlLiteralExactnumeric(BigDecimal.ONE), new SqlLiteralExactnumeric(BigDecimal.valueOf(2)),
+                        new SqlLiteralExactnumeric(BigDecimal.valueOf(3))),
+                List.of(true, false, false), List.of(true, false, true));
+        assertThat(this.visitor.visit(orderBy),
+                equalTo("ORDER BY 1 IS NULL ASC, 1, 2 IS NULL DESC, 2 DESC, 3 DESC"));
+    }
+
     @Test
     void testRewriteCharacterCast() throws AdapterException {
         final SqlFunctionScalarCast cast = new SqlFunctionScalarCast(DataType.createVarChar(254, ExaCharset.UTF8),
